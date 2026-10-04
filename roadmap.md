@@ -8,3 +8,4 @@
 - [x] Calculate the main money card from cash, savings, investments, other assets, and borrowing without double-counting transfers.
 - [x] Hide vertical scrollbars throughout the application while keeping scrolling usable.
 - [x] Add Borrows (repay month) and Loans (EMI date, early payoff plan) pages.
+- [x] Connect Firebase: email/password login, cloud data sync (upload local data on first login), device reminders.
