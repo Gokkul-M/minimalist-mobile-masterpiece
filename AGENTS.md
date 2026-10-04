@@ -1,10 +1,4 @@
-<!-- LOVABLE:BEGIN -->
-> [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
-<!-- LOVABLE:END -->
+- Keep Ledgerly's user-entered financial records and on-device profile in the persisted Zustand store; this keeps the app usable without a server and allows future storage adapters.
+- Keep local credential hashing behind AuthService; on-device access is a convenience lock, not remote-account security.
+- Route the app's sections through one authenticated local shell on /; this preserves the mobile bottom navigation without requiring a network backend.
+- Register the generated offline service worker only outside development and Lovable preview; this prevents stale preview content.
