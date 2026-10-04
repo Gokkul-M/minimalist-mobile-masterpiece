@@ -10,3 +10,4 @@
 - Serve the Firebase web API key from the GOOGLE_API_KEY secret via a server function; it is a public identifier but kept rotatable outside code.
 - Generate reminders (EMIs, borrow repayments, recurring bills, budgets) on the device from stored records and show them as browser notifications or toasts; there is no server push.
 - Keep non-home financial pages inside the shared homepage-derived gradient-header and overlapping-sheet shell so page styling stays consistent.
+- Persist completion of the first-use product tour with the ledger store so it appears only once per user dataset.

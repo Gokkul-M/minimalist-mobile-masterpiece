@@ -239,6 +239,19 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 40px; 
 .home-card[aria-hidden="true"] > div {
   opacity: 0;
 }
+.page-transition > .page-heading,
+.page-transition > .section-stack > .page-heading {
+  animation: page-content-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.page-transition > .panel,
+.page-transition > .section-stack > .panel,
+.page-transition > .sheet {
+  animation: page-content-in 0.4s 0.05s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes page-content-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 @media print {
   aside,
   nav,
