@@ -78,8 +78,8 @@ export function BorrowsPage() {
     </div>;
   };
 
-  return <div className="space-y-6">
-    <div className="flex items-end justify-between gap-3"><div><h1 className="text-3xl font-semibold">Borrows</h1><p className="text-muted-foreground">Money you borrowed and the month you'll repay it.</p></div><Button className="pill shrink-0" onClick={() => { setEditId(null); setForm(emptyBorrow()); }}>+ Add</Button></div>
+  return <div className="section-stack space-y-6">
+    <div className="page-heading grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3"><div className="min-w-0"><p className="text-xs uppercase font-semibold mb-1">YOUR FINANCES</p><h1 className="text-3xl font-semibold truncate">Borrows</h1><p className="text-sm mt-1">Money you borrowed and the month you'll repay it.</p></div><Button className="pill shrink-0" onClick={() => { setEditId(null); setForm(emptyBorrow()); }}>+ Add</Button></div>
     <div className="grid grid-cols-2 gap-3"><Stat label="Total owed" value={money(owed, currency)} /><Stat label="Due this month" value={money(dueNow, currency)} tone={dueNow ? 'text-destructive' : ''} /></div>
     {!open.length && <p className="text-center text-muted-foreground text-sm py-6">No open borrows. You're all clear.</p>}
     {months.map(m => {
@@ -173,8 +173,8 @@ export function LoansPage() {
     toast.success(newBal <= 0.5 ? 'Loan closed 🎉' : prepayMode === 'emi' ? `New EMI ${money(emi, currency)}` : 'Tenure reduced'); setPrepayFor(null); setPrepayAmt('');
   };
 
-  return <div className="space-y-6">
-    <div className="flex items-end justify-between gap-3"><div><h1 className="text-3xl font-semibold">Loans</h1><p className="text-muted-foreground">EMI dates, remaining balance and how to finish sooner.</p></div><Button className="pill shrink-0" onClick={() => { setEditId(null); setForm(emptyLoan()); }}>+ Add</Button></div>
+  return <div className="section-stack space-y-6">
+    <div className="page-heading grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3"><div className="min-w-0"><p className="text-xs uppercase font-semibold mb-1">YOUR FINANCES</p><h1 className="text-3xl font-semibold truncate">Loans</h1><p className="text-sm mt-1">EMI dates, remaining balance and how to finish sooner.</p></div><Button className="pill shrink-0" onClick={() => { setEditId(null); setForm(emptyLoan()); }}>+ Add</Button></div>
     <div className="grid grid-cols-2 gap-3"><Stat label="Outstanding" value={money(outstanding, currency)} /><Stat label="Monthly EMIs" value={money(monthlyEmi, currency)} /></div>
     {!s.loans.length && <p className="text-center text-muted-foreground text-sm py-6">No loans yet. Tap + Add to track one.</p>}
     {s.loans.map(l => {

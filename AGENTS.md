@@ -9,3 +9,4 @@
 - Use Firebase (browser SDK, lazily initialized in src/lib/firebase.ts) for email/password accounts and a per-user Firestore document users/{uid} mirroring the Zustand store; the store stays the in-app source of truth so screens need no backend-specific code.
 - Serve the Firebase web API key from the GOOGLE_API_KEY secret via a server function; it is a public identifier but kept rotatable outside code.
 - Generate reminders (EMIs, borrow repayments, recurring bills, budgets) on the device from stored records and show them as browser notifications or toasts; there is no server push.
+- Keep non-home financial pages inside the shared homepage-derived gradient-header and overlapping-sheet shell so page styling stays consistent.
