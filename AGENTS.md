@@ -5,3 +5,4 @@
 - Use ArrowRow for horizontally overflowing option groups; explicit arrow controls keep mobile options accessible without visible sideways scrollbars.
 - Keep dashboard money summaries in a self-contained native vertical snap scroller; it isolates scrolling from financial calculations and lets the page continue scrolling at the ends.
 - Use semantic glass surface and control tokens in global CSS for app-wide panels and fields; this keeps light and dark treatments consistent.
+- Loop dashboard summaries with duplicate native-scroll cycles and recenter on identical cards; this preserves touch scrolling and makes both directions seamless.
