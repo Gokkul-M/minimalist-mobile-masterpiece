@@ -125,7 +125,7 @@ button {
   margin: -1.75rem -1.25rem -7rem;
   padding: 2rem 1.25rem 9rem;
   color: var(--foreground);
-  background: linear-gradient(153deg, var(--hero-top) 0, var(--hero-bottom) 14rem, var(--background) 14rem);
+  background: linear-gradient(153deg, var(--hero-top) 0%, var(--hero-bottom) 100%);
   overflow: hidden;
 }
 .finance-page::before {
