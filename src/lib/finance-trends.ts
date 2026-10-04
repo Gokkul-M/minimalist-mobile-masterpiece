@@ -9,13 +9,24 @@ export function expenseTrend(entries: Entry[], now = new Date()): TrendPoint[] {
   return sixMonths(now).map(key => ({ label: format(new Date(`${key}-01T12:00:00`), 'MMM'), value: entries.filter(e => e.type === 'expense' && e.date.startsWith(key)).reduce((sum, e) => sum + e.amount, 0) }));
 }
 
-export function recurringTrend(entries: Entry[], schedules: Recurring[], now = new Date()): TrendPoint[] {
-  if (!schedules.length || !entries.some(e => e.note?.startsWith('Recurring payment · ') && schedules.some(r => e.note === `Recurring payment · ${r.id}`))) return [];
-  const ids = new Set(schedules.map(r => r.id));
-  return sixMonths(now).map(key => {
-    const matched = entries.filter(e => e.date.startsWith(key) && e.note?.startsWith('Recurring payment · ') && ids.has(e.note.slice('Recurring payment · '.length)));
-    return { label: format(new Date(`${key}-01T12:00:00`), 'MMM'), value: matched.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0), comparison: matched.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0) };
-  });
+export function recurringTrend(schedules: Recurring[], now = new Date()): TrendPoint[] {
+  const active = schedules.filter(r => r.active);
+  if (!active.length) return [];
+  const months = Array.from({ length: 6 }, (_, i) => monthKey(new Date(now.getFullYear(), now.getMonth() + i, 1)));
+  const amounts = new Map(months.map(key => [key, { received: 0, paid: 0 }]));
+  for (const item of active) {
+    const next = new Date(`${item.nextDue}T12:00:00`);
+    const end = new Date(now.getFullYear(), now.getMonth() + 6, 1);
+    let count = 0;
+    while (next < end && count < 100) {
+      const month = amounts.get(monthKey(next));
+      if (month) month[item.type === 'income' ? 'received' : 'paid'] += item.amount;
+      if (item.frequency === 'weekly') next.setDate(next.getDate() + 7);
+      else next.setMonth(next.getMonth() + 1);
+      count++;
+    }
+  }
+  return months.map(key => ({ label: format(new Date(`${key}-01T12:00:00`), 'MMM'), value: amounts.get(key)?.received ?? 0, comparison: amounts.get(key)?.paid ?? 0 }));
 }
 
 export function savingsTrend(goals: Goal[], entries: Entry[]): TrendPoint[] {
