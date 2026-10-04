@@ -4,4 +4,4 @@
 - Register the generated offline service worker only outside development and Lovable preview; this prevents stale preview content.
 - Use ArrowRow for horizontally overflowing option groups; explicit arrow controls keep mobile options accessible without visible sideways scrollbars.
 - Derive financial trend charts from dated local entries and recorded valuations; never fabricate historical market prices or label transfers as investment profit.
-- Keep the home money-card stack in its own presentation component; it scrolls through current local financial summaries without changing stored records.
+- Keep the home money-card stack in its own presentation component; it cycles through four current local financial summaries on swipe, wheel, or arrow keys without changing stored records.

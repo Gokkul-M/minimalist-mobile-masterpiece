@@ -4,3 +4,4 @@
 - [x] Add analytical charts and meaningful gain/loss summaries to Savings, Expenses, Investments, and Recurring.
 - [x] Verify charts and summaries with real local entries on mobile and desktop.
 - [x] Replace the decorative home card with vertically scrolling, animated glass cards without a visible scrollbar.
+- [x] Make four home cards rotate as a layered stack when scrolled, moving the front card behind the last.

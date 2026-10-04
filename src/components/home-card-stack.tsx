@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { motion } from 'motion/react';
 import { money } from '@/store/ledger';
 
 type HomeCardStackProps = {
@@ -7,39 +8,61 @@ type HomeCardStackProps = {
   spent: number;
   saved: number;
   investments: number;
-  upcoming: number;
 };
 
-export function HomeCardStack({ name, currency, spent, saved, investments, upcoming }: HomeCardStackProps) {
+export function HomeCardStack({ name, currency, spent, saved, investments }: HomeCardStackProps) {
   const [active, setActive] = useState(0);
+  const touchStart = useRef<number | null>(null);
+  const lastStep = useRef(0);
   const cards = [
+    { label: 'LEDGERLY · YOUR MONEY', value: name, detail: '•••• 2026' },
     { label: 'MONTHLY SPENDING', value: money(spent, currency), detail: 'This month' },
     { label: 'SAVINGS', value: money(saved, currency), detail: 'Across your goals' },
     { label: 'INVESTMENTS', value: money(investments, currency), detail: 'Portfolio value' },
-    { label: 'UPCOMING BILLS', value: String(upcoming), detail: upcoming === 1 ? 'Scheduled payment' : 'Scheduled payments' },
   ];
 
-  return <div className="relative mx-auto mt-9 max-w-[380px]">
-    <div aria-hidden="true" className="glass absolute left-6 right-6 top-0 h-32 rounded-[30px] opacity-30" />
-    <div aria-hidden="true" className="glass absolute left-3 right-3 top-3 h-32 rounded-[30px] opacity-55" />
-    <div
-    className="home-card-scroll scrollbar-hidden relative h-[184px] overflow-y-auto overscroll-contain scroll-smooth snap-y snap-mandatory px-1 pt-6 pb-5"
+  function rotate(direction: number) {
+    if (Date.now() - lastStep.current < 360) return;
+    lastStep.current = Date.now();
+    setActive(current => (current + direction + cards.length) % cards.length);
+  }
+
+  return <div
+    className="relative mx-auto mt-9 h-[164px] max-w-[380px] select-none touch-none"
     role="region"
     aria-label="Your money cards"
     tabIndex={0}
-    onScroll={event => {
-      const target = event.currentTarget;
-      setActive(Math.min(cards.length, Math.max(0, Math.round(target.scrollTop / 140))));
+    onWheel={event => {
+      event.preventDefault();
+      if (Math.abs(event.deltaY) > 4) rotate(event.deltaY > 0 ? 1 : -1);
+    }}
+    onTouchStart={event => { touchStart.current = event.touches[0]?.clientY ?? null; }}
+    onTouchEnd={event => {
+      const end = event.changedTouches[0]?.clientY;
+      if (touchStart.current !== null && end !== undefined && Math.abs(end - touchStart.current) > 25) rotate(end < touchStart.current ? 1 : -1);
+      touchStart.current = null;
+    }}
+    onKeyDown={event => {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        rotate(event.key === 'ArrowDown' ? 1 : -1);
+      }
     }}
   >
-    <div className={`home-card glass snap-start rounded-[30px] p-4 flex flex-col justify-between ${active === 0 ? 'home-card-active' : ''}`}>
-      <div className="flex justify-between items-center gap-3"><span className="text-xs opacity-70">LEDGERLY · YOUR MONEY</span><span className="text-lg font-bold italic opacity-70">L.</span></div>
-      <div className="flex justify-between items-end gap-3"><span className="text-sm font-medium truncate">{name}</span><span className="text-xs opacity-70 shrink-0">•••• 2026</span></div>
-    </div>
-    {cards.map(({ label, value, detail }, index) => <div key={label} className={`home-card glass snap-start rounded-[30px] p-4 flex flex-col justify-between ${active === index + 1 ? 'home-card-active' : ''}`}>
-      <div className="flex justify-between items-center gap-3"><span className="text-xs opacity-70">{label}</span><span className="text-lg font-bold italic opacity-70">L.</span></div>
-      <div className="flex justify-between items-end gap-3"><span className="text-xl font-semibold truncate">{value}</span><span className="text-xs opacity-70 text-right shrink-0">{detail}</span></div>
-    </div>)}
-    </div>
+    {cards.map(({ label, value, detail }, index) => {
+      const position = (index - active + cards.length) % cards.length;
+      return <motion.div
+        key={label}
+        className="home-card glass absolute inset-x-0 top-8 h-32 rounded-[30px] p-4 flex flex-col justify-between"
+        style={{ zIndex: cards.length - position }}
+        initial={false}
+        animate={{ y: -position * 10, scale: 1 - position * .045, opacity: 1 - position * .16 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 29 }}
+        aria-hidden={position !== 0}
+      >
+        <div className="flex justify-between items-center gap-3"><span className="text-xs opacity-70">{label}</span><span className="text-lg font-bold italic opacity-70">L.</span></div>
+        <div className="flex justify-between items-end gap-3"><span className={`${index === 0 ? 'text-sm font-medium' : 'text-xl font-semibold'} truncate`}>{value}</span><span className="text-xs opacity-70 text-right shrink-0">{detail}</span></div>
+      </motion.div>;
+    })}
   </div>;
 }
