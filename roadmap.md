@@ -3,6 +3,6 @@
 - [x] Verify mobile and desktop interaction flows.
 - [x] Turn the home money card into a swipeable summary of balances, expenses, savings, and related totals.
 - [x] Hide vertical scrollbars throughout the application while preserving scrolling.
-- [ ] Unify text inputs and dropdowns at one height with 20px corners across the app.
-- [ ] Apply glass surfaces and scroll-reveal motion across all screens.
-- [ ] Animate the vertical home-card swap and leave visible space below the full card.
+- [x] Unify text inputs and dropdowns at one height with 20px corners across the app.
+- [x] Apply glass surfaces and scroll-reveal motion across all screens.
+- [x] Animate the vertical home-card swap and leave visible space below the full card.
