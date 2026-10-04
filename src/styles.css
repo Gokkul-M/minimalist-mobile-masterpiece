@@ -7,9 +7,11 @@
 }
 :root { --background: oklch(.965 .006 255); --foreground: oklch(.19 .028 260); --card: oklch(1 0 0); --primary: oklch(.38 .19 258); --primary-foreground: oklch(1 0 0); --secondary: oklch(.95 .009 255); --muted: oklch(.96 .005 255); --muted-foreground: oklch(.57 .018 255); --accent: oklch(.92 .025 255); --border: oklch(.91 .01 255); --ring: oklch(.55 .15 258); --destructive: oklch(.57 .21 26); --positive: oklch(.55 .14 157); --warning: oklch(.72 .15 76); --hero-foreground: oklch(1 0 0); --hero-top: oklch(.25 .105 259); --hero-bottom: oklch(.48 .19 256); --glass: oklch(1 0 0 / 12%); --glass-border: oklch(1 0 0 / 23%); --bubble-top: oklch(.74 .04 254 / 70%); --bubble-bottom: oklch(.32 .12 257 / 78%); }
 .dark { --background: oklch(.14 .025 260); --foreground: oklch(.96 .005 255); --card: oklch(.19 .03 260); --primary: oklch(.67 .15 255); --primary-foreground: oklch(.13 .025 260); --secondary: oklch(.24 .03 260); --muted: oklch(.23 .03 260); --muted-foreground: oklch(.68 .02 255); --accent: oklch(.29 .055 258); --border: oklch(.32 .025 260); --ring: oklch(.7 .12 255); --destructive: oklch(.69 .17 25); --positive: oklch(.72 .14 155); --warning: oklch(.8 .15 76); --hero-top: oklch(.19 .085 260); --hero-bottom: oklch(.36 .15 258); --glass: oklch(1 0 0 / 9%); --glass-border: oklch(1 0 0 / 18%); }
-* { box-sizing: border-box; border-color: var(--border); }
-html { background: var(--background); overflow-x: clip; }
-body { margin: 0; background: var(--background); color: var(--foreground); font-family: var(--font-sans); overflow-x: clip; }
+* { box-sizing: border-box; border-color: var(--border); scrollbar-width: none; }
+*::-webkit-scrollbar { display: none; }
+html { background: var(--background); overflow-x: clip; scrollbar-width: none; }
+body { margin: 0; background: var(--background); color: var(--foreground); font-family: var(--font-sans); overflow-x: clip; scrollbar-width: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
 .hero-surface { background: linear-gradient(153deg,var(--hero-top) 2%,var(--hero-bottom) 100%); color: var(--hero-foreground); }
