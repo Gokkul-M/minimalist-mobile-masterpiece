@@ -11,4 +11,4 @@
 - [x] Connect Firebase: email/password login, cloud data sync (upload local data on first login), device reminders.
 - [x] Borrows/loans editing, history, prepay; Assets page; investment tips + live prices; 44px budget dropdown.
 - [x] Align every non-home page with the homepage's gradient header, overlapping sheet, spacing, and title hierarchy.
-- [ ] Add a first-use guided tour, branded loading feedback, and consistent page transitions.
+- [x] Add a first-use guided tour, branded loading feedback, and consistent page transitions.
