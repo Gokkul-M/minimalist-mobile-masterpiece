@@ -1,0 +1,3 @@
+- [ ] Build local-first profile entry, dashboard, transactions, analytics, budgets, savings, investments, recurring, insights, and settings.
+- [ ] Add quick entry, local persistence, import/export, theme, and offline install support.
+- [ ] Verify mobile and desktop interaction flows.
