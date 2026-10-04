@@ -2,7 +2,7 @@ import { useLedger } from '@/store/ledger';
 import { firebase } from '@/lib/firebase';
 
 // Financial data fields mirrored to the signed-in user's Firestore document.
-const KEYS = ['onboarded', 'theme', 'entries', 'goals', 'holdings', 'recurring', 'rules', 'budgets', 'monthlyIncome', 'dailyCap', 'globalCap', 'rollover', 'customCategories', 'rates', 'notifications', 'otherAssets', 'borrowedBalance', 'borrows', 'loans'] as const;
+const KEYS = ['onboarded', 'theme', 'entries', 'goals', 'holdings', 'recurring', 'rules', 'budgets', 'monthlyIncome', 'dailyCap', 'globalCap', 'rollover', 'customCategories', 'rates', 'notifications', 'otherAssets', 'borrowedBalance', 'borrows', 'loans', 'assets'] as const;
 
 type Snapshot = Record<string, unknown>;
 const pick = (): Snapshot => {
