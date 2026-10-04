@@ -23,7 +23,7 @@ export function BorrowsPage() {
   const dueNow = open.filter(b => b.dueMonth <= thisMonth).reduce((a, b) => a + b.amount - b.repaid, 0);
 
   const add = () => {
-    const n = Number(amount); if (!person.trim() || !(n > 0) || !due) return toast.error('Enter who, how much and the repay month');
+    const n = Number(amount); if (!person.trim() || !(n > 0) || !due) { toast.error('Enter who, how much and the repay month'); return; }
     s.set({ borrows: [{ id: uid(), person: person.trim(), amount: n, repaid: 0, borrowedOn: today(), dueMonth: due }, ...s.borrows] });
     setPerson(''); setAmount(''); toast.success('Borrow added');
   };
@@ -98,8 +98,8 @@ export function LoansPage() {
 
   const add = () => {
     const l: Loan = { id: uid(), name: f.name.trim(), principal: +f.principal, rate: +f.rate, emi: +f.emi, emiDay: Math.min(31, Math.max(1, +f.emiDay)), startDate: f.startDate, paidEmis: Math.max(0, +f.paidEmis) };
-    if (!l.name || !(l.principal > 0) || !(l.emi > 0) || l.rate < 0) return toast.error('Fill in loan name, amount, rate and EMI');
-    if (loanMath(l).n === Infinity) return toast.error('EMI is too low to cover the interest');
+    if (!l.name || !(l.principal > 0) || !(l.emi > 0) || l.rate < 0) { toast.error('Fill in loan name, amount, rate and EMI'); return; }
+    if (loanMath(l).n === Infinity) { toast.error('EMI is too low to cover the interest'); return; }
     s.set({ loans: [l, ...s.loans] }); setF({ ...f, name: '', principal: '', rate: '', emi: '', paidEmis: '0' }); toast.success('Loan added');
   };
   const payEmi = (l: Loan) => {
