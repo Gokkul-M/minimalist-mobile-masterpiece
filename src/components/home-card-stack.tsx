@@ -63,7 +63,7 @@ export function HomeCardStack({ name, currency, spent, saved, investments, netWo
       >
         <div className="flex justify-between items-center gap-3"><span className="text-xs opacity-70">{label}</span><span className="text-lg font-bold italic opacity-70">L.</span></div>
         <div className="flex justify-between items-end gap-3"><span className="text-xl font-semibold truncate" title={value}>{value}</span><span className="text-xs opacity-70 text-right shrink-0">{detail}</span></div>
-        {index === 0 && <div className="text-[10px] opacity-70 truncate">{name} · Cash + savings + investments + assets − borrowing</div>}
+        {index === 0 && <div className="text-xs opacity-70 truncate">{name}</div>}
       </motion.div>;
     })}
   </div>;
