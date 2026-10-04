@@ -5,3 +5,4 @@
 - Use ArrowRow for horizontally overflowing option groups; explicit arrow controls keep mobile options accessible without visible sideways scrollbars.
 - Derive financial trend charts from dated local entries and recorded valuations; never fabricate historical market prices or label transfers as investment profit.
 - Keep the home money-card stack in its own presentation component; it cycles through four current local financial summaries on swipe, wheel, or arrow keys without changing stored records.
+- Calculate home net worth from recorded cash flow plus current savings and holding values, with separately entered other assets and borrowing; transfers do not change total worth because they move money within it.
