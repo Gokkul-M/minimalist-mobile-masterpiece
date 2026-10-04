@@ -40,6 +40,7 @@ export function authMessage(e: unknown) {
     'auth/network-request-failed': 'No internet connection. Ledgerly needs to be online.',
     'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.',
     'auth/operation-not-allowed': 'Email sign-in is not enabled in Firebase yet.',
+    'auth/configuration-not-found': 'Email sign-in is not set up in Firebase yet (Authentication > Sign-in method > Email/Password).',
   };
   return map[code] ?? (e instanceof Error ? e.message : 'Something went wrong.');
 }
