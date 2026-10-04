@@ -10,7 +10,7 @@ export function expenseTrend(entries: Entry[], now = new Date()): TrendPoint[] {
 }
 
 export function recurringTrend(entries: Entry[], schedules: Recurring[], now = new Date()): TrendPoint[] {
-  if (!schedules.length) return [];
+  if (!schedules.length || !entries.some(e => e.note?.startsWith('Recurring payment · ') && schedules.some(r => e.note === `Recurring payment · ${r.id}`))) return [];
   const ids = new Set(schedules.map(r => r.id));
   return sixMonths(now).map(key => {
     const matched = entries.filter(e => e.date.startsWith(key) && e.note?.startsWith('Recurring payment · ') && ids.has(e.note.slice('Recurring payment · '.length)));
@@ -23,7 +23,7 @@ export function savingsTrend(goals: Goal[], entries: Entry[]): TrendPoint[] {
   const saved = goals.reduce((sum, g) => sum + g.saved, 0);
   const opening = Math.max(0, saved - linked.reduce((sum, e) => sum + e.amount, 0));
   const dates = [...new Set(linked.map(e => e.date))].sort();
-  if (dates.length === 0) return saved > 0 ? [{ label: 'Current', value: saved }] : [];
+  if (dates.length === 0) return saved > 0 ? [{ label: 'Opening', value: 0 }, { label: 'Current', value: saved }] : [];
   return [{ label: 'Opening', value: opening }, ...dates.map(date => ({ label: format(new Date(`${date}T12:00:00`), 'MMM d'), value: opening + linked.filter(e => e.date <= date).reduce((sum, e) => sum + e.amount, 0) }))];
 }
 
