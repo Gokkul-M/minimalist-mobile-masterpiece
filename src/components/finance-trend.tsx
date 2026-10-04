@@ -4,7 +4,7 @@ import { money } from '@/store/ledger';
 export type TrendPoint = { label: string; value: number; comparison?: number };
 
 export function FinanceTrend({ title, points, currency = 'USD', primaryLabel, comparisonLabel, emptyText }: { title: string; points: TrendPoint[]; currency?: string; primaryLabel: string; comparisonLabel?: string; emptyText: string }) {
-  const hasActivity = points.some(point => point.value !== 0 || (point.comparison ?? 0) !== 0);
+  const hasActivity = points.length > 0;
   return <section className="mt-6" aria-label={title}>
     <h2 className="text-lg font-semibold mb-4">{title}</h2>
     {hasActivity ? <div className="h-56 w-full min-w-0" role="img" aria-label={`${title}: ${points.map(p => `${p.label} ${primaryLabel} ${money(p.value, currency)}${comparisonLabel ? `, ${comparisonLabel} ${money(p.comparison ?? 0, currency)}` : ''}`).join('; ')}`}>
