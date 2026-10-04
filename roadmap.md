@@ -3,3 +3,4 @@
 - [x] Verify mobile and desktop interaction flows.
 - [x] Add analytical charts and meaningful gain/loss summaries to Savings, Expenses, Investments, and Recurring.
 - [x] Verify charts and summaries with real local entries on mobile and desktop.
+- [ ] Replace the decorative home card with vertically scrolling, animated glass cards without a visible scrollbar.
