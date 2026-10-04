@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { ArrowDownLeft, ArrowUpRight, ChevronLeft, ChevronRight, PiggyBank, TrendingUp, Wallet, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { money } from '@/store/ledger';
@@ -11,6 +11,7 @@ export function SummaryCarousel({ balance, spent, savings, earned, investments, 
 }) {
   const [active, setActive] = useState(0);
   const [direction, setDirection] = useState(1);
+  const reducedMotion = useReducedMotion();
   const cards: Summary[] = [
     { label: 'Available balance', value: balance, detail: 'Your money, at a glance', icon: Wallet },
     { label: 'Monthly expenses', value: spent, detail: 'Spent this month', icon: ArrowUpRight },
@@ -37,10 +38,10 @@ export function SummaryCarousel({ balance, spent, savings, earned, investments, 
             initial={{ x: direction > 0 ? '100%' : '-100%', opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: direction > 0 ? '-100%' : '100%', opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 290, damping: 32 }}
+            transition={reducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 290, damping: 32 }}
             drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.2}
             onDragEnd={(_, info) => { if (Math.abs(info.offset.x) > 45 || Math.abs(info.velocity.x) > 450) change(info.offset.x < 0 ? 1 : -1); }}
-            className="absolute inset-0 flex cursor-grab flex-col justify-between p-5 text-left active:cursor-grabbing"
+            className="absolute inset-0 flex cursor-grab touch-pan-y flex-col justify-between p-5 text-left active:cursor-grabbing"
             aria-live="polite"
           >
             <div className="flex items-center justify-between gap-3">
