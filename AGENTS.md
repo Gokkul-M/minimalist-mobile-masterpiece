@@ -3,4 +3,4 @@
 - Route the app's sections through one authenticated local shell on /; this preserves the mobile bottom navigation without requiring a network backend.
 - Register the generated offline service worker only outside development and Lovable preview; this prevents stale preview content.
 - Use ArrowRow for horizontally overflowing option groups; explicit arrow controls keep mobile options accessible without visible sideways scrollbars.
-- Keep dashboard money summaries in a self-contained carousel; it isolates swipe and arrow navigation from financial calculations.
+- Keep dashboard money summaries in a self-contained native vertical snap scroller; it isolates scrolling from financial calculations and lets the page continue scrolling at the ends.
