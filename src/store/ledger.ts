@@ -7,14 +7,16 @@ export type Goal = { id: string; name: string; target: number; saved: number; de
 export type Holding = { id: string; name: string; kind: string; qty: number; buyPrice: number; currentValue: number; date: string; valuations?: { date: string; value: number }[] };
 export type Recurring = { id: string; title: string; amount: number; type: 'income' | 'expense'; category: string; nextDue: string; frequency: 'weekly' | 'monthly'; active: boolean };
 export type Rule = { id: string; title: string; threshold: number; category: string; active: boolean };
+export type Borrow = { id: string; person: string; amount: number; repaid: number; borrowedOn: string; dueMonth: string; note?: string | undefined };
+export type Loan = { id: string; name: string; principal: number; rate: number; emi: number; emiDay: number; startDate: string; paidEmis: number };
 export type Profile = { name: string; email: string; passwordHash?: string; currency: string; pinHash?: string };
 export const categories = ['Food & Drink', 'Groceries', 'Shopping', 'Transport', 'Bills', 'Health', 'Entertainment', 'Travel', 'Salary', 'Other'];
 type State = {
-  profile: Profile | null; session: boolean; onboarded: boolean; theme: 'light' | 'dark'; entries: Entry[]; goals: Goal[]; holdings: Holding[]; recurring: Recurring[]; rules: Rule[]; budgets: Record<string, number>; monthlyIncome: number; dailyCap: number; globalCap: number; rollover: boolean; customCategories: string[]; rates: Record<string, number>; notifications: boolean; otherAssets: number; borrowedBalance: number;
+  profile: Profile | null; session: boolean; onboarded: boolean; theme: 'light' | 'dark'; entries: Entry[]; goals: Goal[]; holdings: Holding[]; recurring: Recurring[]; rules: Rule[]; budgets: Record<string, number>; monthlyIncome: number; dailyCap: number; globalCap: number; rollover: boolean; customCategories: string[]; rates: Record<string, number>; notifications: boolean; otherAssets: number; borrowedBalance: number; borrows: Borrow[]; loans: Loan[];
   set: (patch: Partial<Omit<State, 'set' | 'addEntry' | 'updateEntry' | 'removeEntry' | 'processRecurring' | 'loadDemo' | 'reset'>>) => void;
   addEntry: (entry: Omit<Entry, 'id'>) => void; updateEntry: (id: string, entry: Partial<Entry>) => void; removeEntry: (id: string) => void; processRecurring: () => void; loadDemo: () => void; reset: () => void;
 };
-const initial = { profile: null, session: false, onboarded: false, theme: 'light' as const, entries: [] as Entry[], goals: [] as Goal[], holdings: [] as Holding[], recurring: [] as Recurring[], rules: [] as Rule[], budgets: {} as Record<string, number>, monthlyIncome: 0, dailyCap: 0, globalCap: 0, rollover: false, customCategories: [] as string[], rates: { EUR: .92, GBP: .79, INR: 83 } as Record<string, number>, notifications: true, otherAssets: 0, borrowedBalance: 0 };
+const initial = { profile: null, session: false, onboarded: false, theme: 'light' as const, entries: [] as Entry[], goals: [] as Goal[], holdings: [] as Holding[], recurring: [] as Recurring[], rules: [] as Rule[], budgets: {} as Record<string, number>, monthlyIncome: 0, dailyCap: 0, globalCap: 0, rollover: false, customCategories: [] as string[], rates: { EUR: .92, GBP: .79, INR: 83 } as Record<string, number>, notifications: true, otherAssets: 0, borrowedBalance: 0, borrows: [] as Borrow[], loans: [] as Loan[] };
 const id = () => crypto.randomUUID();
 export const useLedger = create<State>()(persist((set, get) => ({
   ...initial,
