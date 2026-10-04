@@ -39,33 +39,3 @@ textarea { min-height: 88px; border-radius: 20px; background: var(--control-glas
 .scrollbar-hidden { scrollbar-width: none; }
 .scrollbar-hidden::-webkit-scrollbar { display: none; }
 @media print { aside, nav, button, input, .fixed { display: none !important; } body, .panel { background: var(--card) !important; color: var(--foreground) !important; } main { padding: 0 !important; } }
-
-/* Frosted-glass theme: vivid indigo backdrop with soft 3D light blobs, milky translucent panels */
-:root, .dark {
-  --background: oklch(.36 .22 285); --foreground: oklch(.99 .01 290); --card: oklch(1 0 0 / 18%);
-  --primary: oklch(1 0 0); --primary-foreground: oklch(.38 .2 285);
-  --secondary: oklch(1 0 0 / 18%); --muted: oklch(1 0 0 / 14%); --muted-foreground: oklch(.9 .04 290);
-  --accent: oklch(.5 .2 290); --border: oklch(1 0 0 / 35%); --ring: oklch(1 0 0 / 70%);
-  --positive: oklch(.85 .15 160); --warning: oklch(.86 .15 80); --destructive: oklch(.75 .2 25);
-  --hero-top: oklch(1 0 0 / 0%); --hero-bottom: oklch(1 0 0 / 0%);
-  --glass: oklch(1 0 0 / 20%); --glass-border: oklch(1 0 0 / 55%);
-  --surface-glass: oklch(1 0 0 / 22%); --surface-glass-border: oklch(1 0 0 / 55%);
-  --control-glass: oklch(1 0 0 / 18%);
-  --bubble-top: oklch(1 0 0 / 40%); --bubble-bottom: oklch(.8 .12 300 / 45%);
-}
-html { background: oklch(.36 .22 285); }
-body {
-  background:
-    radial-gradient(42vmax 42vmax at 88% 12%, oklch(.82 .17 75 / 85%), transparent 62%),
-    radial-gradient(38vmax 38vmax at 6% 40%, oklch(.55 .26 300 / 90%), transparent 65%),
-    radial-gradient(46vmax 46vmax at 92% 78%, oklch(.72 .19 50 / 70%), transparent 62%),
-    radial-gradient(40vmax 40vmax at 20% 100%, oklch(.45 .24 275), transparent 65%),
-    linear-gradient(160deg, oklch(.4 .24 280), oklch(.3 .2 285));
-  background-attachment: fixed; color: var(--foreground);
-}
-.glass, .sheet, .panel, .field, textarea {
-  backdrop-filter: blur(28px) saturate(150%);
-  box-shadow: 0 10px 30px oklch(.2 .15 285 / 22%), inset 0 1px 0 oklch(1 0 0 / 45%);
-}
-.panel, .glass { border-radius: 28px; }
-.field, textarea { border-radius: 20px; }
