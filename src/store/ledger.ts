@@ -10,11 +10,11 @@ export type Rule = { id: string; title: string; threshold: number; category: str
 export type Profile = { name: string; email: string; passwordHash?: string; currency: string; pinHash?: string };
 export const categories = ['Food & Drink', 'Groceries', 'Shopping', 'Transport', 'Bills', 'Health', 'Entertainment', 'Travel', 'Salary', 'Other'];
 type State = {
-  profile: Profile | null; session: boolean; onboarded: boolean; theme: 'light' | 'dark'; entries: Entry[]; goals: Goal[]; holdings: Holding[]; recurring: Recurring[]; rules: Rule[]; budgets: Record<string, number>; monthlyIncome: number; dailyCap: number; globalCap: number; rollover: boolean; customCategories: string[]; rates: Record<string, number>; notifications: boolean;
+  profile: Profile | null; session: boolean; onboarded: boolean; theme: 'light' | 'dark'; entries: Entry[]; goals: Goal[]; holdings: Holding[]; recurring: Recurring[]; rules: Rule[]; budgets: Record<string, number>; monthlyIncome: number; dailyCap: number; globalCap: number; rollover: boolean; customCategories: string[]; rates: Record<string, number>; notifications: boolean; otherAssets: number; borrowedBalance: number;
   set: (patch: Partial<Omit<State, 'set' | 'addEntry' | 'updateEntry' | 'removeEntry' | 'processRecurring' | 'loadDemo' | 'reset'>>) => void;
   addEntry: (entry: Omit<Entry, 'id'>) => void; updateEntry: (id: string, entry: Partial<Entry>) => void; removeEntry: (id: string) => void; processRecurring: () => void; loadDemo: () => void; reset: () => void;
 };
-const initial = { profile: null, session: false, onboarded: false, theme: 'light' as const, entries: [] as Entry[], goals: [] as Goal[], holdings: [] as Holding[], recurring: [] as Recurring[], rules: [] as Rule[], budgets: {} as Record<string, number>, monthlyIncome: 0, dailyCap: 0, globalCap: 0, rollover: false, customCategories: [] as string[], rates: { EUR: .92, GBP: .79, INR: 83 } as Record<string, number>, notifications: true };
+const initial = { profile: null, session: false, onboarded: false, theme: 'light' as const, entries: [] as Entry[], goals: [] as Goal[], holdings: [] as Holding[], recurring: [] as Recurring[], rules: [] as Rule[], budgets: {} as Record<string, number>, monthlyIncome: 0, dailyCap: 0, globalCap: 0, rollover: false, customCategories: [] as string[], rates: { EUR: .92, GBP: .79, INR: 83 } as Record<string, number>, notifications: true, otherAssets: 0, borrowedBalance: 0 };
 const id = () => crypto.randomUUID();
 export const useLedger = create<State>()(persist((set, get) => ({
   ...initial,
@@ -59,3 +59,8 @@ export const useLedger = create<State>()(persist((set, get) => ({
 export const money = (n: number, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(n || 0);
 export const monthEntries = (entries: Entry[], date = new Date()) => entries.filter(e => { const d = new Date(`${e.date}T12:00:00`); return d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear(); });
 export const total = (entries: Entry[], type: EntryType) => entries.filter(e => e.type === type).reduce((sum, e) => sum + e.amount, 0);
+export const netWorth = (entries: Entry[], goals: Goal[], holdings: Holding[], otherAssets = 0, borrowedBalance = 0) =>
+  total(entries, 'income') - total(entries, 'expense') - total(entries, 'saving') - total(entries, 'investment')
+  + goals.reduce((sum, goal) => sum + goal.saved, 0)
+  + holdings.reduce((sum, holding) => sum + holding.currentValue, 0)
+  + otherAssets - borrowedBalance;

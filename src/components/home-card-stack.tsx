@@ -8,14 +8,15 @@ type HomeCardStackProps = {
   spent: number;
   saved: number;
   investments: number;
+  netWorth: number;
 };
 
-export function HomeCardStack({ name, currency, spent, saved, investments }: HomeCardStackProps) {
+export function HomeCardStack({ name, currency, spent, saved, investments, netWorth }: HomeCardStackProps) {
   const [active, setActive] = useState(0);
   const touchStart = useRef<number | null>(null);
   const lastStep = useRef(0);
   const cards = [
-    { label: 'LEDGERLY · YOUR MONEY', value: name, detail: '•••• 2026' },
+    { label: 'LEDGERLY · YOUR MONEY', value: money(netWorth, currency), detail: 'NET WORTH' },
     { label: 'MONTHLY SPENDING', value: money(spent, currency), detail: 'This month' },
     { label: 'SAVINGS', value: money(saved, currency), detail: 'Across your goals' },
     { label: 'INVESTMENTS', value: money(investments, currency), detail: 'Portfolio value' },
@@ -61,7 +62,8 @@ export function HomeCardStack({ name, currency, spent, saved, investments }: Hom
         aria-hidden={position !== 0}
       >
         <div className="flex justify-between items-center gap-3"><span className="text-xs opacity-70">{label}</span><span className="text-lg font-bold italic opacity-70">L.</span></div>
-        <div className="flex justify-between items-end gap-3"><span className={`${index === 0 ? 'text-sm font-medium' : 'text-xl font-semibold'} truncate`}>{value}</span><span className="text-xs opacity-70 text-right shrink-0">{detail}</span></div>
+        <div className="flex justify-between items-end gap-3"><span className="text-xl font-semibold truncate" title={value}>{value}</span><span className="text-xs opacity-70 text-right shrink-0">{detail}</span></div>
+        {index === 0 && <div className="text-[10px] opacity-70 truncate">{name} · Cash + savings + investments + assets − borrowing</div>}
       </motion.div>;
     })}
   </div>;

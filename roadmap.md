@@ -5,3 +5,5 @@
 - [x] Verify charts and summaries with real local entries on mobile and desktop.
 - [x] Replace the decorative home card with vertically scrolling, animated glass cards without a visible scrollbar.
 - [x] Make four home cards rotate as a layered stack when scrolled, moving the front card behind the last.
+- [ ] Calculate the main money card from cash, savings, investments, other assets, and borrowing without double-counting transfers.
+- [ ] Hide vertical scrollbars throughout the application while keeping scrolling usable.
