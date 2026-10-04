@@ -126,9 +126,9 @@ export function ScanPay({ onClose }: { onClose: () => void }) {
             <span className="inline-flex w-full h-11 items-center justify-center gap-2 rounded-full border bg-card text-sm font-medium cursor-pointer"><ImageUp size={17} /> Upload QR image</span>
             <input type="file" accept="image/*" className="sr-only" onChange={e => fromImage(e.target.files?.[0])} />
           </label>
-          <div className="flex w-full gap-2">
-            <input className="field" placeholder="Or paste upi://pay link" value={manual} onChange={e => setManual(e.target.value)} />
-            <Button className="pill" onClick={() => accept(manual)}>Go</Button>
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 w-full items-center">
+            <input className="field min-w-0" placeholder="Or paste upi://pay link" value={manual} onChange={e => setManual(e.target.value)} />
+            <Button className="pill shrink-0" onClick={() => accept(manual)}>Go</Button>
           </div>
         </div>
       )}
