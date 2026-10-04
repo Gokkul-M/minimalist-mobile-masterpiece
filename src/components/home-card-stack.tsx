@@ -19,8 +19,11 @@ export function HomeCardStack({ name, currency, spent, saved, investments, upcom
     { label: 'UPCOMING BILLS', value: String(upcoming), detail: upcoming === 1 ? 'Scheduled payment' : 'Scheduled payments' },
   ];
 
-  return <div
-    className="home-card-scroll scrollbar-hidden mx-auto mt-9 h-[164px] max-w-[380px] overflow-y-auto overscroll-contain scroll-smooth snap-y snap-mandatory px-1 pb-9"
+  return <div className="relative mx-auto mt-9 max-w-[380px]">
+    <div aria-hidden="true" className="glass absolute left-6 right-6 top-0 h-32 rounded-[30px] opacity-30" />
+    <div aria-hidden="true" className="glass absolute left-3 right-3 top-3 h-32 rounded-[30px] opacity-55" />
+    <div
+    className="home-card-scroll scrollbar-hidden relative h-[184px] overflow-y-auto overscroll-contain scroll-smooth snap-y snap-mandatory px-1 pt-6 pb-5"
     role="region"
     aria-label="Your money cards"
     tabIndex={0}
@@ -37,5 +40,6 @@ export function HomeCardStack({ name, currency, spent, saved, investments, upcom
       <div className="flex justify-between items-center gap-3"><span className="text-xs opacity-70">{label}</span><span className="text-lg font-bold italic opacity-70">L.</span></div>
       <div className="flex justify-between items-end gap-3"><span className="text-xl font-semibold truncate">{value}</span><span className="text-xs opacity-70 text-right shrink-0">{detail}</span></div>
     </div>)}
+    </div>
   </div>;
 }
