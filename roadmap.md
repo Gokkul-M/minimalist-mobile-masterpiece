@@ -1,3 +1,5 @@
 - [x] Build local-first profile entry, dashboard, transactions, analytics, budgets, savings, investments, recurring, insights, and settings.
 - [x] Add quick entry, local persistence, import/export, theme, and offline install support.
 - [x] Verify mobile and desktop interaction flows.
+- [ ] Add analytical charts and meaningful gain/loss summaries to Savings, Expenses, Investments, and Recurring.
+- [ ] Verify charts and summaries with real local entries on mobile and desktop.
