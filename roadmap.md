@@ -1,9 +1,3 @@
 - [x] Build local-first profile entry, dashboard, transactions, analytics, budgets, savings, investments, recurring, insights, and settings.
 - [x] Add quick entry, local persistence, import/export, theme, and offline install support.
 - [x] Verify mobile and desktop interaction flows.
-- [x] Turn the home money card into a swipeable summary of balances, expenses, savings, and related totals.
-- [x] Hide vertical scrollbars throughout the application while preserving scrolling.
-- [x] Unify text inputs and dropdowns at one height with 20px corners across the app.
-- [x] Apply glass surfaces and scroll-reveal motion across all screens.
-- [x] Animate the vertical home-card swap and leave visible space below the full card.
-- [x] Loop the home-card stack in both directions with visible rear cards and 2px white glass edges throughout.
