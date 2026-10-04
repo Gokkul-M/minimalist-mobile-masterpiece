@@ -6,3 +6,4 @@
 - [x] Unify text inputs and dropdowns at one height with 20px corners across the app.
 - [x] Apply glass surfaces and scroll-reveal motion across all screens.
 - [x] Animate the vertical home-card swap and leave visible space below the full card.
+- [x] Loop the home-card stack in both directions with visible rear cards and 2px white glass edges throughout.
