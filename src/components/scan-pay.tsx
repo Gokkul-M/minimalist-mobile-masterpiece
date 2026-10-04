@@ -77,7 +77,7 @@ export function ScanPay({ onClose }: { onClose: () => void }) {
     const img = new Image(); img.src = URL.createObjectURL(file);
     await img.decode().catch(() => {});
     const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
-    const ctx = c.getContext('2d'); if (!ctx || !c.width) return toast.error('Could not read image');
+    const ctx = c.getContext('2d'); if (!ctx || !c.width) { toast.error('Could not read image'); return; }
     ctx.drawImage(img, 0, 0);
     const code = jsQR(ctx.getImageData(0, 0, c.width, c.height).data, c.width, c.height);
     if (!code) toast.error('No QR code found in image'); else accept(code.data);
