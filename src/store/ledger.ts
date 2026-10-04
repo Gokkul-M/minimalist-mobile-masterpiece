@@ -4,19 +4,21 @@ import { persist } from 'zustand/middleware';
 export type EntryType = 'expense' | 'income' | 'transfer' | 'saving' | 'investment';
 export type Entry = { id: string; title: string; amount: number; type: EntryType; category: string; date: string; note?: string; tags?: string[]; location?: string; goalId?: string; splitWith?: string; receipt?: string };
 export type Goal = { id: string; name: string; target: number; saved: number; deadline: string };
-export type Holding = { id: string; name: string; kind: string; qty: number; buyPrice: number; currentValue: number; date: string; valuations?: { date: string; value: number }[] };
+export type Holding = { id: string; name: string; kind: string; qty: number; buyPrice: number; currentValue: number; date: string; valuations?: { date: string; value: number }[]; symbol?: string | undefined; priceCurrency?: string | undefined; lastPrice?: number | undefined; priceAt?: string | undefined };
 export type Recurring = { id: string; title: string; amount: number; type: 'income' | 'expense'; category: string; nextDue: string; frequency: 'weekly' | 'monthly'; active: boolean };
 export type Rule = { id: string; title: string; threshold: number; category: string; active: boolean };
-export type Borrow = { id: string; person: string; amount: number; repaid: number; borrowedOn: string; dueMonth: string; note?: string | undefined };
-export type Loan = { id: string; name: string; principal: number; rate: number; emi: number; emiDay: number; startDate: string; paidEmis: number };
+export type Payment = { date: string; amount: number; note?: string | undefined };
+export type Borrow = { id: string; person: string; amount: number; repaid: number; borrowedOn: string; dueMonth: string; note?: string | undefined; history?: Payment[] | undefined };
+export type Asset = { id: string; name: string; kind: string; value: number; purchaseValue?: number | undefined; date: string; note?: string | undefined; valuations?: { date: string; value: number }[] | undefined };
+export type Loan = { id: string; name: string; principal: number; rate: number; emi: number; emiDay: number; startDate: string; paidEmis: number; lender?: string | undefined; history?: Payment[] | undefined };
 export type Profile = { name: string; email: string; passwordHash?: string; currency: string; pinHash?: string };
 export const categories = ['Food & Drink', 'Groceries', 'Shopping', 'Transport', 'Bills', 'Health', 'Entertainment', 'Travel', 'Salary', 'Other'];
 type State = {
-  profile: Profile | null; session: boolean; onboarded: boolean; theme: 'light' | 'dark'; entries: Entry[]; goals: Goal[]; holdings: Holding[]; recurring: Recurring[]; rules: Rule[]; budgets: Record<string, number>; monthlyIncome: number; dailyCap: number; globalCap: number; rollover: boolean; customCategories: string[]; rates: Record<string, number>; notifications: boolean; otherAssets: number; borrowedBalance: number; borrows: Borrow[]; loans: Loan[];
+  profile: Profile | null; session: boolean; onboarded: boolean; theme: 'light' | 'dark'; entries: Entry[]; goals: Goal[]; holdings: Holding[]; recurring: Recurring[]; rules: Rule[]; budgets: Record<string, number>; monthlyIncome: number; dailyCap: number; globalCap: number; rollover: boolean; customCategories: string[]; rates: Record<string, number>; notifications: boolean; otherAssets: number; borrowedBalance: number; borrows: Borrow[]; loans: Loan[]; assets: Asset[];
   set: (patch: Partial<Omit<State, 'set' | 'addEntry' | 'updateEntry' | 'removeEntry' | 'processRecurring' | 'loadDemo' | 'reset'>>) => void;
   addEntry: (entry: Omit<Entry, 'id'>) => void; updateEntry: (id: string, entry: Partial<Entry>) => void; removeEntry: (id: string) => void; processRecurring: () => void; loadDemo: () => void; reset: () => void;
 };
-const initial = { profile: null, session: false, onboarded: false, theme: 'light' as const, entries: [] as Entry[], goals: [] as Goal[], holdings: [] as Holding[], recurring: [] as Recurring[], rules: [] as Rule[], budgets: {} as Record<string, number>, monthlyIncome: 0, dailyCap: 0, globalCap: 0, rollover: false, customCategories: [] as string[], rates: { EUR: .92, GBP: .79, INR: 83 } as Record<string, number>, notifications: true, otherAssets: 0, borrowedBalance: 0, borrows: [] as Borrow[], loans: [] as Loan[] };
+const initial = { profile: null, session: false, onboarded: false, theme: 'light' as const, entries: [] as Entry[], goals: [] as Goal[], holdings: [] as Holding[], recurring: [] as Recurring[], rules: [] as Rule[], budgets: {} as Record<string, number>, monthlyIncome: 0, dailyCap: 0, globalCap: 0, rollover: false, customCategories: [] as string[], rates: { EUR: .92, GBP: .79, INR: 83 } as Record<string, number>, notifications: true, otherAssets: 0, borrowedBalance: 0, borrows: [] as Borrow[], loans: [] as Loan[], assets: [] as Asset[] };
 const id = () => crypto.randomUUID();
 export const useLedger = create<State>()(persist((set, get) => ({
   ...initial,
@@ -61,8 +63,8 @@ export const useLedger = create<State>()(persist((set, get) => ({
 export const money = (n: number, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(n || 0);
 export const monthEntries = (entries: Entry[], date = new Date()) => entries.filter(e => { const d = new Date(`${e.date}T12:00:00`); return d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear(); });
 export const total = (entries: Entry[], type: EntryType) => entries.filter(e => e.type === type).reduce((sum, e) => sum + e.amount, 0);
-export const netWorth = (entries: Entry[], goals: Goal[], holdings: Holding[], otherAssets = 0, borrowedBalance = 0) =>
+export const netWorth = (entries: Entry[], goals: Goal[], holdings: Holding[], otherAssets = 0, borrowedBalance = 0, assets: Asset[] = []) =>
   total(entries, 'income') - total(entries, 'expense') - total(entries, 'saving') - total(entries, 'investment')
   + goals.reduce((sum, goal) => sum + goal.saved, 0)
   + holdings.reduce((sum, holding) => sum + holding.currentValue, 0)
-  + otherAssets - borrowedBalance;
+  + otherAssets + assets.reduce((sum, a) => sum + a.value, 0) - borrowedBalance;

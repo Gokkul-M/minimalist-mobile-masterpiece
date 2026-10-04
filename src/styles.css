@@ -171,6 +171,8 @@ button {
   padding: 0 16px;
   outline: none;
 }
+.field { min-height: 44px; flex-shrink: 0; line-height: 44px; }
+select.field { appearance: none; -webkit-appearance: none; padding-right: 40px; line-height: normal; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%; background-size: 5px 5px; background-repeat: no-repeat; }
 .field:focus {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
