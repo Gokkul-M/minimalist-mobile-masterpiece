@@ -108,7 +108,7 @@ export function InvestmentsPage() {
 
     <div className="panel p-5 space-y-3">
       <h2 className="font-semibold">Add a holding</h2>
-      <div className="flex gap-2"><input className="field" placeholder="Name (e.g. Apple, Bitcoin)" value={name} onChange={e => setName(e.target.value)} /><Button type="button" variant="secondary" className="pill shrink-0" onClick={lookup}><Search size={16} /> Find</Button></div>
+      <div className="relative"><input className="field w-full" style={{ paddingLeft: 44 }} placeholder="Name (e.g. Apple, Bitcoin)" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); void lookup(); } }} /><button type="button" aria-label="Search ticker" onClick={() => void lookup()} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 grid place-items-center rounded-full text-muted-foreground hover:bg-secondary"><Search size={16} /></button></div>
       {!!results.length && <div className="rounded-2xl border divide-y overflow-hidden">{results.map(r => <button key={r.symbol} type="button" className="w-full text-left px-4 py-2 text-sm hover:bg-secondary" onClick={() => { setSymbol(r.symbol); setName(r.name); setResults([]); }}><b>{r.symbol}</b> · {r.name} <span className="text-muted-foreground">{r.exchange}</span></button>)}</div>}
       <div className="grid grid-cols-2 gap-2">
         <select className="field" value={kind} onChange={e => setKind(e.target.value)} aria-label="Type">{KINDS.map(k => <option key={k}>{k}</option>)}</select>
