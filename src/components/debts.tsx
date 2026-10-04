@@ -15,7 +15,7 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: str
 
 function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return <div className="fixed inset-0 z-[60] bg-foreground/40 flex items-end sm:items-center justify-center" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
-    <div className="bg-card rounded-t-[30px] sm:rounded-[30px] w-full max-w-md p-6 max-h-[90vh] overflow-y-auto space-y-3">
+    <div className="bg-card rounded-t-[30px] sm:rounded-[30px] w-full max-w-md p-6 pb-28 sm:pb-6 max-h-[90vh] overflow-y-auto space-y-3">
       <div className="flex items-center justify-between"><h2 className="text-xl font-semibold">{title}</h2><Button variant="ghost" size="icon" className="pill" aria-label="Close" onClick={onClose}><X size={18} /></Button></div>
       {children}
     </div>
