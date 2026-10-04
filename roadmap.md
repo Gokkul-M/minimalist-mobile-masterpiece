@@ -7,3 +7,4 @@
 - [x] Make four home cards rotate as a layered stack when scrolled, moving the front card behind the last.
 - [x] Calculate the main money card from cash, savings, investments, other assets, and borrowing without double-counting transfers.
 - [x] Hide vertical scrollbars throughout the application while keeping scrolling usable.
+- [x] Add Borrows (repay month) and Loans (EMI date, early payoff plan) pages.
