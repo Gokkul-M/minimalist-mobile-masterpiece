@@ -14,14 +14,14 @@ export function SummaryCarousel({ balance, spent, savings, earned, investments, 
     { label: 'Investments', value: investments, detail: 'Current portfolio value', icon: TrendingUp },
   ];
   return <div className="mx-auto mt-8 w-full max-w-[380px]" aria-label="Money summaries">
-    <div className="relative h-[170px] select-none">
+    <div className="relative h-[174px] select-none">
       <div className="absolute inset-x-6 top-0 h-[150px] rounded-2xl glass opacity-40" aria-hidden="true" />
       <div className="absolute inset-x-3 top-2 h-[150px] rounded-2xl glass opacity-65" aria-hidden="true" />
-      <div className="absolute inset-x-0 top-4 h-[154px] overflow-y-auto overflow-x-hidden rounded-2xl glass snap-y snap-mandatory touch-pan-y overscroll-y-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hero-foreground" tabIndex={0} role="region" aria-label="Money summaries, scroll vertically to see more">
+      <div className="absolute inset-x-0 top-4 h-[154px] overflow-y-auto overflow-x-hidden rounded-[20px] snap-y snap-mandatory touch-pan-y overscroll-y-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hero-foreground" tabIndex={0} role="region" aria-label="Money summaries, scroll vertically to see more">
         {cards.map(card => {
           const Icon = card.icon;
           const formatted = money(card.value, currency).split('.');
-          return <div key={card.label} className="flex h-[154px] shrink-0 snap-start snap-always flex-col justify-between p-5 text-left">
+          return <div key={card.label} className="summary-slide glass flex h-[154px] shrink-0 snap-start snap-always flex-col justify-between rounded-[20px] p-5 text-left">
             <div className="flex items-center justify-between gap-3">
               <span className="text-[11px] font-medium uppercase opacity-75">LEDGERLY · {card.label}</span>
               <Icon size={19} className="shrink-0 opacity-80" aria-hidden="true" />

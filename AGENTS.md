@@ -4,3 +4,4 @@
 - Register the generated offline service worker only outside development and Lovable preview; this prevents stale preview content.
 - Use ArrowRow for horizontally overflowing option groups; explicit arrow controls keep mobile options accessible without visible sideways scrollbars.
 - Keep dashboard money summaries in a self-contained native vertical snap scroller; it isolates scrolling from financial calculations and lets the page continue scrolling at the ends.
+- Use semantic glass surface and control tokens in global CSS for app-wide panels and fields; this keeps light and dark treatments consistent.
