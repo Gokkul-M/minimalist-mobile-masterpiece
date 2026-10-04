@@ -77,8 +77,8 @@ export function InvestmentsPage() {
   };
   const tips = portfolioTips();
 
-  return <div className="space-y-5">
-    <div><h1 className="text-3xl font-semibold">Investments</h1><p className="text-muted-foreground">Live prices for listed holdings, manual values for the rest.</p></div>
+  return <div className="section-stack space-y-5">
+    <div className="page-heading"><p className="text-xs uppercase font-semibold mb-1">YOUR FINANCES</p><h1 className="text-3xl font-semibold">Investments</h1><p className="text-sm mt-1">Live prices for listed holdings, manual values for the rest.</p></div>
     <div className="hero-surface rounded-[28px] p-6">
       <div className="flex justify-between items-start"><p className="text-sm opacity-70">Portfolio value</p><Button variant="ghost" size="icon" className="pill text-hero-foreground hover:bg-hero-foreground/10" aria-label="Refresh prices" onClick={() => void refresh()} disabled={loading}><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /></Button></div>
       <p className="text-4xl font-semibold mt-1">{money(current, currency)}</p>

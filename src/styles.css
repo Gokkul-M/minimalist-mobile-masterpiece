@@ -118,6 +118,56 @@ button {
   border: 1px solid var(--border);
   border-radius: 24px;
 }
+.finance-page {
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100vh - 68px);
+  margin: -1.75rem -1.25rem -7rem;
+  padding: 2rem 1.25rem 9rem;
+  color: var(--foreground);
+  background: linear-gradient(153deg, var(--hero-top) 0, var(--hero-bottom) 14rem, var(--background) 14rem);
+  overflow: hidden;
+}
+.finance-page::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 9.5rem 0 0;
+  border-radius: 32px 32px 0 0;
+  background: var(--background);
+}
+.finance-page > :not(.section-stack),
+.finance-page > .section-stack {
+  max-width: 64rem;
+  margin-inline: auto;
+}
+.finance-page > .page-heading,
+.finance-page > .section-stack > .page-heading {
+  min-height: 7.5rem;
+  margin-bottom: 1.25rem;
+  color: var(--hero-foreground);
+}
+.finance-page .page-heading > div > p,
+.finance-page > .section-stack > .page-heading > p {
+  color: var(--hero-foreground);
+  opacity: 0.68;
+}
+.finance-page .page-heading > button,
+.finance-page .page-heading > div:last-child > button {
+  background: var(--glass);
+  border-color: var(--glass-border);
+  color: var(--hero-foreground);
+  backdrop-filter: blur(20px) saturate(145%);
+}
+.finance-page > .section-stack {
+  max-width: 64rem;
+}
+@media (min-width: 768px) {
+  .finance-page {
+    margin: -1.75rem -2.5rem -3rem;
+    padding: 2.5rem 2.5rem 5rem;
+  }
+}
 .pill {
   border-radius: 999px;
 }

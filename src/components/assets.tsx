@@ -37,8 +37,8 @@ export function AssetsPage() {
     setForm(null); setEditId(null);
   };
 
-  return <div className="space-y-5">
-    <div className="flex items-end justify-between gap-3"><div><h1 className="text-3xl font-semibold">Assets</h1><p className="text-muted-foreground">Everything you own, in one place.</p></div><Button className="pill shrink-0" onClick={() => { setEditId(null); setForm(empty()); }}>+ Add</Button></div>
+  return <div className="section-stack space-y-5">
+    <div className="page-heading grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3"><div className="min-w-0"><p className="text-xs uppercase font-semibold mb-1">YOUR FINANCES</p><h1 className="text-3xl font-semibold truncate">Assets</h1><p className="text-sm mt-1">Everything you own, in one place.</p></div><Button className="pill shrink-0" onClick={() => { setEditId(null); setForm(empty()); }}>+ Add</Button></div>
     <div className="hero-surface rounded-[28px] p-6">
       <p className="text-sm opacity-70">Total assets</p><p className="text-4xl font-semibold mt-1">{money(grand, currency)}</p>
       <div className="grid grid-cols-3 gap-2 mt-4 text-xs"><div><p className="opacity-60">Assets</p><p className="font-semibold text-sm">{money(total, currency)}</p></div><div><p className="opacity-60">Investments</p><p className="font-semibold text-sm">{money(holdings, currency)}</p></div><div><p className="opacity-60">Savings</p><p className="font-semibold text-sm">{money(saved, currency)}</p></div></div>
