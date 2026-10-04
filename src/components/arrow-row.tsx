@@ -25,8 +25,8 @@ export function ArrowRow({ children, className = '' }: { children: ReactNode; cl
     node.scrollBy({ left: direction * Math.max(120, node.clientWidth * .7), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
   };
   return <div className={`flex min-w-0 items-center gap-1 ${className}`}>
-    {!edges.right || !edges.left ? <Button type="button" variant="ghost" size="icon" className="pill shrink-0" aria-label="Previous options" title="Previous options" disabled={edges.left} onClick={() => move(-1)}><ChevronLeft /></Button> : null}
+    {!edges.right || !edges.left ? <Button type="button" variant="secondary" size="icon" className="pill shrink-0" aria-label="Previous options" title="Previous options" disabled={edges.left} onClick={() => move(-1)}><ChevronLeft /></Button> : null}
     <div ref={track} onScroll={update} className="flex min-w-0 flex-1 gap-2 overflow-x-auto scrollbar-hidden scroll-smooth" tabIndex={0}>{children}</div>
-    {!edges.right || !edges.left ? <Button type="button" variant="ghost" size="icon" className="pill shrink-0" aria-label="Next options" title="Next options" disabled={edges.right} onClick={() => move(1)}><ChevronRight /></Button> : null}
+    {!edges.right || !edges.left ? <Button type="button" variant="secondary" size="icon" className="pill shrink-0" aria-label="Next options" title="Next options" disabled={edges.right} onClick={() => move(1)}><ChevronRight /></Button> : null}
   </div>;
 }
