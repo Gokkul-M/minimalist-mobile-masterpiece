@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { BarChart3, QrCode, Sparkles, WalletCards, X } from 'lucide-react';
-import { useState, type LucideIcon } from 'react';
+import { BarChart3, QrCode, Sparkles, WalletCards, X, type LucideIcon } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 const steps: { icon: LucideIcon; eyebrow: string; title: string; description: string; points: string[] }[] = [
