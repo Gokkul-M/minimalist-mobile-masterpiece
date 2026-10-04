@@ -28,8 +28,6 @@ button { cursor: pointer; }
 .field:focus { outline: 2px solid var(--ring); outline-offset: 2px; }
 .scrollbar-hidden { scrollbar-width: none; }
 .scrollbar-hidden::-webkit-scrollbar { display: none; }
-.home-card-scroll { scroll-padding-top: 24px; }
-.home-card { height: 128px; margin-bottom: 12px; transition: transform .3s ease, opacity .3s ease; transform: scale(.96); opacity: .72; }
-.home-card-active { transform: scale(1); opacity: 1; }
-@media (prefers-reduced-motion: reduce) { .home-card-scroll { scroll-behavior: auto; } }
+.home-card > div { transition: opacity .25s ease; }
+.home-card[aria-hidden="true"] > div { opacity: 0; }
 @media print { aside, nav, button, input, .fixed { display: none !important; } body, .panel { background: var(--card) !important; color: var(--foreground) !important; } main { padding: 0 !important; } }
