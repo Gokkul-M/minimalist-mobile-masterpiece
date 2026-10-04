@@ -9,3 +9,4 @@
 - [x] Hide vertical scrollbars throughout the application while keeping scrolling usable.
 - [x] Add Borrows (repay month) and Loans (EMI date, early payoff plan) pages.
 - [x] Connect Firebase: email/password login, cloud data sync (upload local data on first login), device reminders.
+- [x] Borrows/loans editing, history, prepay; Assets page; investment tips + live prices; 44px budget dropdown.
