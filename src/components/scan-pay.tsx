@@ -3,7 +3,7 @@ import jsQR from 'jsqr';
 import { toast } from 'sonner';
 import { ArrowLeft, Check, ImageUp, QrCode, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { categories, money, useLedger } from '@/store/ledger';
+import { allCategories, money, useLedger } from '@/store/ledger';
 
 type Payee = { raw: string; pa: string; pn: string; params: URLSearchParams };
 type Step = 'scan' | 'amount' | 'category' | 'confirm';
@@ -20,7 +20,7 @@ function parseQr(text: string): Payee | null {
 export function ScanPay({ onClose }: { onClose: () => void }) {
   const s = useLedger();
   const currency = s.profile?.currency || 'USD';
-  const allCats = [...categories.filter(c => c !== 'Salary'), ...s.customCategories];
+  const allCats = allCategories(s).filter(c => c !== 'Salary');
   const [step, setStep] = useState<Step>('scan');
   const [payee, setPayee] = useState<Payee | null>(null);
   const [amount, setAmount] = useState('');
