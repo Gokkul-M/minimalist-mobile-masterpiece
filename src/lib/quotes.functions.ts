@@ -3,7 +3,21 @@ import { z } from 'zod';
 
 const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; Ledgerly/1.0)' };
 
+const OZ = 31.1034768;
 async function chartPrice(symbol: string): Promise<{ price: number; currency: string } | null> {
+  // Metals priced per gram from COMEX futures (USD per troy ounce).
+  if (symbol === 'GOLD-G' || symbol === 'SILVER-G') {
+    const q = await chartPrice(symbol === 'GOLD-G' ? 'GC=F' : 'SI=F');
+    return q ? { price: q.price / OZ, currency: 'USD' } : null;
+  }
+  // Indian mutual funds: latest NAV by AMFI scheme code.
+  if (symbol.startsWith('MF:')) {
+    const r = await fetch(`https://api.mfapi.in/mf/${encodeURIComponent(symbol.slice(3))}/latest`);
+    if (!r.ok) return null;
+    const j = await r.json() as { data?: { nav?: string }[] };
+    const nav = Number(j.data?.[0]?.nav);
+    return nav > 0 ? { price: nav, currency: 'INR' } : null;
+  }
   const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`, { headers: UA });
   if (!res.ok) return null;
   const json = await res.json() as { chart?: { result?: { meta?: { regularMarketPrice?: number; currency?: string } }[] } };
@@ -38,8 +52,15 @@ export const getQuotes = createServerFn({ method: 'POST' })
 
 /** Ticker lookup by company / coin / fund name. */
 export const searchSymbols = createServerFn({ method: 'POST' })
-  .inputValidator((d) => z.object({ q: z.string().min(1).max(60) }).parse(d))
+  .inputValidator((d) => z.object({ q: z.string().min(1).max(60), kind: z.string().max(30).optional() }).parse(d))
   .handler(async ({ data }) => {
+    if (data.kind === 'Mutual funds') {
+      try {
+        const r = await fetch(`https://api.mfapi.in/mf/search?q=${encodeURIComponent(data.q)}`);
+        const j = r.ok ? await r.json() as { schemeCode: number; schemeName: string }[] : [];
+        if (j.length) return j.slice(0, 8).map(f => ({ symbol: `MF:${f.schemeCode}`, name: f.schemeName, exchange: 'AMFI NAV', type: 'MUTUALFUND' }));
+      } catch { /* fall back to Yahoo */ }
+    }
     try {
       const res = await fetch(`https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(data.q)}&quotesCount=6&newsCount=0`, { headers: UA });
       if (!res.ok) return [];
