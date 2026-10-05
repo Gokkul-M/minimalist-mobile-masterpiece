@@ -27,7 +27,7 @@ async function chartPrice(symbol: string): Promise<{ price: number; currency: st
 
 /** Latest market prices for ticker symbols, converted into the user's currency. */
 export const getQuotes = createServerFn({ method: 'POST' })
-  .inputValidator((d) => z.object({ symbols: z.array(z.string().min(1).max(32)).max(50), currency: z.string().length(3) }).parse(d))
+  .validator((d) => z.object({ symbols: z.array(z.string().min(1).max(32)).max(50), currency: z.string().length(3) }).parse(d))
   .handler(async ({ data }) => {
     const fx = new Map<string, number>();
     const out: Record<string, { price: number; currency: string; native: number; nativeCurrency: string } | null> = {};
@@ -52,7 +52,7 @@ export const getQuotes = createServerFn({ method: 'POST' })
 
 /** Ticker lookup by company / coin / fund name. */
 export const searchSymbols = createServerFn({ method: 'POST' })
-  .inputValidator((d) => z.object({ q: z.string().min(1).max(60), kind: z.string().max(30).optional() }).parse(d))
+  .validator((d) => z.object({ q: z.string().min(1).max(60), kind: z.string().max(30).optional() }).parse(d))
   .handler(async ({ data }) => {
     if (data.kind === 'Mutual funds') {
       try {
