@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 export type EntryType = 'expense' | 'income' | 'transfer' | 'saving' | 'investment';
 export type Entry = { id: string; title: string; amount: number; type: EntryType; category: string; date: string; time?: string | undefined; note?: string; tags?: string[]; location?: string; goalId?: string; splitWith?: string; receipt?: string };
 export type Goal = { id: string; name: string; target: number; saved: number; deadline: string };
-export type Holding = { id: string; name: string; kind: string; qty: number; buyPrice: number; currentValue: number; date: string; valuations?: { date: string; value: number }[]; symbol?: string | undefined; priceCurrency?: string | undefined; lastPrice?: number | undefined; priceAt?: string | undefined };
+export type Holding = { id: string; name: string; kind: string; qty: number; buyPrice: number; currentValue: number; date: string; valuations?: { date: string; value: number }[]; symbol?: string | undefined; priceCurrency?: string | undefined; lastPrice?: number | undefined; priceAt?: string | undefined; rate?: number | undefined };
 export type Recurring = { id: string; title: string; amount: number; type: 'income' | 'expense'; category: string; nextDue: string; frequency: 'once' | 'weekly' | 'monthly'; active: boolean };
 export type Rule = { id: string; title: string; threshold: number; category: string; active: boolean };
 export type Payment = { date: string; amount: number; note?: string | undefined };

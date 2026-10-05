@@ -9,7 +9,11 @@ import { getQuotes, searchSymbols } from '@/lib/quotes.functions';
 import { money, useLedger, type Holding } from '@/store/ledger';
 import { loanMath } from '@/components/debts';
 
-const KINDS = ['Stocks', 'Mutual funds', 'ETF', 'Crypto', 'FD / Bonds', 'Gold', 'Other'];
+const KINDS = ['Stocks', 'Mutual funds', 'ETF', 'Crypto', 'FD / Bonds', 'Gold', 'Silver', 'Other'];
+const METAL: Record<string, string> = { Gold: 'GOLD-G', Silver: 'SILVER-G' };
+const isFixed = (k: string) => k === 'FD / Bonds';
+/** Accrued value of a fixed deposit / bond, compounded quarterly from its start date. */
+const fixedValue = (h: Holding) => { const yrs = Math.max(0, (Date.now() - new Date(h.date).getTime()) / (365.25 * 864e5)); return Math.round(h.qty * h.buyPrice * Math.pow(1 + (h.rate ?? 0) / 400, 4 * yrs) * 100) / 100; };
 const todayKey = () => format(new Date(), 'yyyy-MM-dd');
 
 /** Rule-based, educational suggestions derived from the user's own records. */
@@ -38,13 +42,15 @@ export function portfolioTips(): { title: string; body: string }[] {
 export function InvestmentsPage() {
   const s = useLedger(); const currency = s.profile?.currency || 'USD';
   const [name, setName] = useState(''); const [kind, setKind] = useState('Stocks'); const [symbol, setSymbol] = useState('');
-  const [qty, setQty] = useState(''); const [buy, setBuy] = useState(''); const [value, setValue] = useState('');
+  const [rate, setRate] = useState(''); const [qty, setQty] = useState(''); const [buy, setBuy] = useState(''); const [value, setValue] = useState('');
   const [results, setResults] = useState<{ symbol: string; name: string; exchange: string }[]>([]);
   const [loading, setLoading] = useState(false); const [lastAt, setLastAt] = useState<string | null>(null);
   const invested = s.holdings.reduce((a, h) => a + h.qty * h.buyPrice, 0);
   const current = s.holdings.reduce((a, h) => a + h.currentValue, 0); const gain = current - invested;
 
   const refresh = useCallback(async (quiet = false) => {
+    const day0 = todayKey();
+    useLedger.getState().set({ holdings: useLedger.getState().holdings.map(h => { if (!isFixed(h.kind) || !h.rate) return h; const v = fixedValue(h); return { ...h, currentValue: v, priceAt: new Date().toISOString(), valuations: [...(h.valuations ?? []).filter(x => x.date !== day0), { date: day0, value: v }] }; }) });
     const hs = useLedger.getState().holdings.filter(h => h.symbol);
     if (!hs.length) return;
     setLoading(true);
@@ -65,13 +71,15 @@ export function InvestmentsPage() {
 
   useEffect(() => { void refresh(true); const t = setInterval(() => void refresh(true), 60000); return () => clearInterval(t); }, [refresh]);
 
-  const lookup = async () => { if (!name.trim()) return; const r = await searchSymbols({ data: { q: name.trim() } }); setResults(r); if (!r.length) toast('No matching ticker found'); };
+  const lookup = async () => { if (!name.trim()) return; const r = await searchSymbols({ data: { q: name.trim(), kind } }); setResults(r); if (!r.length) toast('No matching ticker found'); };
 
   const add = async () => {
-    const q = Number(qty), b = Number(buy);
-    if (!name.trim() || !(q > 0) || !(b >= 0)) { toast.error('Enter name, quantity and buy price'); return; }
-    const h: Holding = { id: crypto.randomUUID(), name: name.trim(), kind, qty: q, buyPrice: b, currentValue: Number(value) || q * b, date: todayKey(), symbol: symbol.trim().toUpperCase() || undefined };
-    s.set({ holdings: [...s.holdings, h] }); setName(''); setQty(''); setBuy(''); setValue(''); setSymbol(''); setResults([]);
+    const fixed = isFixed(kind); const q = fixed ? 1 : Number(qty), b = Number(buy);
+    if (!name.trim() || !(q > 0) || !(b >= 0)) { toast.error(fixed ? 'Enter name and amount invested' : 'Enter name, quantity and buy price'); return; }
+    const sym = fixed ? undefined : (METAL[kind] ?? (symbol.trim().toUpperCase() || undefined));
+    const h: Holding = { id: crypto.randomUUID(), name: name.trim(), kind, qty: q, buyPrice: b, currentValue: Number(value) || q * b, date: todayKey(), symbol: sym, rate: fixed ? Number(rate) || 0 : undefined };
+    s.set({ holdings: [...s.holdings, h] }); setName(''); setQty(''); setBuy(''); setValue(''); setSymbol(''); setRate(''); setResults([]);
+    if (fixed) { void refresh(true); }
     toast.success('Holding added');
     if (h.symbol) await refresh();
   };
@@ -97,11 +105,11 @@ export function InvestmentsPage() {
     <div className="panel p-5">
       <h2 className="font-semibold mb-2">Holdings</h2>
       {s.holdings.length ? s.holdings.map(h => { const pl = h.currentValue - h.qty * h.buyPrice; return <div key={h.id} className="py-4 border-b last:border-0">
-        <div className="flex justify-between gap-2"><div className="min-w-0"><p className="font-medium truncate">{h.name}{h.symbol && <span className="ml-2 text-xs rounded-full bg-secondary px-2 py-0.5">{h.symbol}</span>}</p><p className="text-xs text-muted-foreground">{h.kind} · {h.qty} @ {money(h.buyPrice, currency)}{h.lastPrice ? ` · now ${money(h.lastPrice, currency)}` : ''}</p>{h.symbol && <p className="text-[11px] text-positive flex items-center gap-1 mt-0.5"><span className="w-1.5 h-1.5 rounded-full bg-positive" /> Live{h.priceAt ? ` · ${format(new Date(h.priceAt), 'HH:mm')}` : ''}</p>}</div>
+        <div className="flex justify-between gap-2"><div className="min-w-0"><p className="font-medium truncate">{h.name}{h.symbol && <span className="ml-2 text-xs rounded-full bg-secondary px-2 py-0.5">{h.symbol}</span>}</p><p className="text-xs text-muted-foreground">{h.kind} · {h.qty} @ {money(h.buyPrice, currency)}{h.lastPrice ? ` · now ${money(h.lastPrice, currency)}` : ''}</p>{(h.symbol || (isFixed(h.kind) && !!h.rate)) && <p className="text-[11px] text-positive flex items-center gap-1 mt-0.5"><span className="w-1.5 h-1.5 rounded-full bg-positive" /> Live{h.priceAt ? ` · ${format(new Date(h.priceAt), 'HH:mm')}` : ''}</p>}</div>
           <div className="text-right shrink-0"><p className="font-semibold">{money(h.currentValue, currency)}</p><p className={`text-xs ${pl >= 0 ? 'text-positive' : 'text-destructive'}`}>{pl >= 0 ? '+' : ''}{money(pl, currency)}</p></div></div>
         <div className="flex gap-2 mt-3">
-          {!h.symbol && <Button size="sm" variant="secondary" className="pill" onClick={() => { const n = prompt('Updated total value', String(h.currentValue)); if (n !== null && Number(n) >= 0) s.set({ holdings: s.holdings.map(x => x.id === h.id ? { ...x, currentValue: Number(n), valuations: [...(x.valuations ?? []).filter(v => v.date !== todayKey()), { date: todayKey(), value: Number(n) }] } : x) }); }}><Pencil size={14} /> Update value</Button>}
-          <Button size="sm" variant="secondary" className="pill" onClick={() => { const sym = prompt('Ticker symbol for live price (e.g. AAPL, RELIANCE.NS, BTC-USD). Leave empty to remove.', h.symbol ?? ''); if (sym !== null) { s.set({ holdings: s.holdings.map(x => x.id === h.id ? { ...x, symbol: sym.trim().toUpperCase() || undefined } : x) }); void refresh(); } }}><TrendingUp size={14} /> {h.symbol ? 'Change symbol' : 'Live price'}</Button>
+          {!h.symbol && !isFixed(h.kind) && <Button size="sm" variant="secondary" className="pill" onClick={() => { const n = prompt('Updated total value', String(h.currentValue)); if (n !== null && Number(n) >= 0) s.set({ holdings: s.holdings.map(x => x.id === h.id ? { ...x, currentValue: Number(n), valuations: [...(x.valuations ?? []).filter(v => v.date !== todayKey()), { date: todayKey(), value: Number(n) }] } : x) }); }}><Pencil size={14} /> Update value</Button>}
+          {!isFixed(h.kind) && !METAL[h.kind] && <Button size="sm" variant="secondary" className="pill" onClick={() => { const sym = prompt('Ticker symbol for live price (e.g. AAPL, RELIANCE.NS, BTC-USD). Leave empty to remove.', h.symbol ?? ''); if (sym !== null) { s.set({ holdings: s.holdings.map(x => x.id === h.id ? { ...x, symbol: sym.trim().toUpperCase() || undefined } : x) }); void refresh(); } }}><TrendingUp size={14} /> {h.symbol ? 'Change symbol' : 'Live price'}</Button>}
           <Button size="sm" variant="ghost" className="pill" aria-label={`Delete ${h.name}`} onClick={() => s.set({ holdings: s.holdings.filter(x => x.id !== h.id) })}><Trash2 size={14} /></Button>
         </div></div>; }) : <p className="text-sm text-muted-foreground py-4 text-center">No holdings yet.</p>}
     </div>
@@ -111,13 +119,15 @@ export function InvestmentsPage() {
       <div className="relative"><input className="field w-full" style={{ paddingLeft: 44 }} placeholder="Name (e.g. Apple, Bitcoin)" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); void lookup(); } }} /><button type="button" aria-label="Search ticker" onClick={() => void lookup()} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 grid place-items-center rounded-full text-muted-foreground hover:bg-secondary"><Search size={16} /></button></div>
       {!!results.length && <div className="rounded-2xl border divide-y overflow-hidden">{results.map(r => <button key={r.symbol} type="button" className="w-full text-left px-4 py-2 text-sm hover:bg-secondary" onClick={() => { setSymbol(r.symbol); setName(r.name); setResults([]); }}><b>{r.symbol}</b> · {r.name} <span className="text-muted-foreground">{r.exchange}</span></button>)}</div>}
       <div className="grid grid-cols-2 gap-2">
-        <select className="field" value={kind} onChange={e => setKind(e.target.value)} aria-label="Type">{KINDS.map(k => <option key={k}>{k}</option>)}</select>
-        <input className="field" placeholder="Ticker (optional)" value={symbol} onChange={e => setSymbol(e.target.value)} />
-        <input className="field" inputMode="decimal" placeholder="Quantity" value={qty} onChange={e => setQty(e.target.value)} />
-        <input className="field" inputMode="decimal" placeholder="Buy price / unit" value={buy} onChange={e => setBuy(e.target.value)} />
+        <select className="field min-w-0" value={kind} onChange={e => { setKind(e.target.value); setSymbol(METAL[e.target.value] ?? ''); setResults([]); }} aria-label="Type">{KINDS.map(k => <option key={k}>{k}</option>)}</select>
+        {isFixed(kind) ? <input className="field min-w-0" inputMode="decimal" placeholder="Interest % / year" value={rate} onChange={e => setRate(e.target.value)} />
+          : <input className="field min-w-0" placeholder="Ticker (optional)" value={symbol} readOnly={!!METAL[kind]} onChange={e => setSymbol(e.target.value)} />}
+        {isFixed(kind) ? <input className="field min-w-0 col-span-2" inputMode="decimal" placeholder="Amount invested" value={buy} onChange={e => setBuy(e.target.value)} /> : <>
+        <input className="field min-w-0" inputMode="decimal" placeholder={METAL[kind] ? 'Grams' : 'Quantity'} value={qty} onChange={e => setQty(e.target.value)} />
+        <input className="field min-w-0" inputMode="decimal" placeholder={METAL[kind] ? 'Buy price / gram' : 'Buy price / unit'} value={buy} onChange={e => setBuy(e.target.value)} /></>}
       </div>
-      {!symbol && <input className="field" inputMode="decimal" placeholder="Current total value (no ticker)" value={value} onChange={e => setValue(e.target.value)} />}
-      <p className="text-xs text-muted-foreground">With a ticker, the value updates live from market prices (converted to {currency}). Indian stocks use .NS / .BO, crypto like BTC-USD.</p>
+      {!symbol && !isFixed(kind) && <input className="field" inputMode="decimal" placeholder="Current total value (no ticker)" value={value} onChange={e => setValue(e.target.value)} />}
+      <p className="text-xs text-muted-foreground">With a ticker, the value updates live from market prices (converted to {currency}). Stocks/ETFs: AAPL, RELIANCE.NS · Crypto: BTC-USD · Mutual funds: search by fund name · Gold & silver: live price per gram · FD / bonds: value grows daily at your interest rate.</p>
       <Button className="pill w-full" onClick={add}>Add holding</Button>
     </div>
   </div>;
