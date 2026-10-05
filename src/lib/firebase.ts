@@ -4,11 +4,11 @@ import type { Firestore } from 'firebase/firestore';
 import { getFirebaseWebKey } from '@/lib/firebase-config.functions';
 
 const baseConfig = {
-  authDomain: 'expense-tracker-568d0.firebaseapp.com',
-  projectId: 'expense-tracker-568d0',
-  storageBucket: 'expense-tracker-568d0.firebasestorage.app',
-  messagingSenderId: '308241480280',
-  appId: '1:308241480280:web:9c172c0d0cbd19882b682d',
+  authDomain: 'ledgerly-ed187.firebaseapp.com',
+  projectId: 'ledgerly-ed187',
+  storageBucket: 'ledgerly-ed187.firebasestorage.app',
+  messagingSenderId: '36201670725',
+  appId: '1:36201670725:web:9c172c0d0cbd19882b682d',
 };
 
 let ready: Promise<{ app: FirebaseApp; auth: Auth; db: Firestore }> | null = null;
