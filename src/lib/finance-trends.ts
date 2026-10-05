@@ -24,6 +24,7 @@ export function recurringTrend(schedules: Recurring[], now = new Date()): TrendP
       if (item.frequency === 'weekly') next.setDate(next.getDate() + 7);
       else next.setMonth(next.getMonth() + 1);
       count++;
+      if (item.frequency === 'once') break;
     }
   }
   return months.map(key => ({ label: format(new Date(`${key}-01T12:00:00`), 'MMM'), value: amounts.get(key)?.received ?? 0, comparison: amounts.get(key)?.paid ?? 0 }));
