@@ -90,7 +90,7 @@ export function InvestmentsPage() {
     <div className="hero-surface rounded-[28px] p-6">
       <div className="flex justify-between items-start"><p className="text-sm opacity-70">Portfolio value</p><Button variant="ghost" size="icon" className="pill text-hero-foreground hover:bg-hero-foreground/10" aria-label="Refresh prices" onClick={() => void refresh()} disabled={loading}><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /></Button></div>
       <p className="text-4xl font-semibold mt-1">{money(current, currency)}</p>
-      <p className="text-sm opacity-80 mt-3">Invested {money(invested, currency)} · <span className={gain >= 0 ? 'text-positive' : 'text-destructive'}>{gain >= 0 ? '+' : ''}{money(gain, currency)} ({invested ? (gain / invested * 100).toFixed(1) : 0}%)</span></p>
+      <p className="text-sm opacity-80 mt-3">Invested {money(invested, currency)} · <span className="inline-block rounded-full bg-[var(--glass)] px-2 py-0.5 font-semibold whitespace-nowrap">{gain >= 0 ? '+' : ''}{money(gain, currency)} ({invested ? (gain / invested * 100).toFixed(1) : 0}%)</span></p>
       {lastAt && <p className="text-xs opacity-60 mt-1">Live prices updated {formatDistanceToNow(new Date(lastAt), { addSuffix: true })} · refreshes every minute</p>}
     </div>
     <div className="panel p-5"><FinanceTrend title="Portfolio performance" points={investmentTrend(s.holdings)} currency={currency} primaryLabel="Current value" comparisonLabel="Amount invested" emptyText="Add a holding to see its performance." />
