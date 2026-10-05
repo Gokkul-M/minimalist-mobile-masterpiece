@@ -8,7 +8,7 @@ const baseConfig = {
   projectId: 'ledgerly-ed187',
   storageBucket: 'ledgerly-ed187.firebasestorage.app',
   messagingSenderId: '36201670725',
-  appId: '1:36201670725:web:9c172c0d0cbd19882b682d',
+  appId: '1:36201670725:web:2632f1a6ed8081e5f91b2c',
 };
 
 let ready: Promise<{ app: FirebaseApp; auth: Auth; db: Firestore }> | null = null;
