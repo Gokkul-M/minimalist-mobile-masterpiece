@@ -11,15 +11,21 @@ const baseConfig = {
   appId: '1:36201670725:web:2632f1a6ed8081e5f91b2c',
 };
 
+const WEB_API_KEY = 'AIzaSyATpgScCuZCPmZIudyahuKbzlZPtNUCOHo';
+
 let ready: Promise<{ app: FirebaseApp; auth: Auth; db: Firestore }> | null = null;
 
 /** Browser-only lazy Firebase init. */
 export function firebase() {
   if (!ready) {
     ready = (async () => {
-      const [{ initializeApp, getApps }, { getAuth }, { getFirestore }, { apiKey }] = await Promise.all([
-        import('firebase/app'), import('firebase/auth'), import('firebase/firestore'), getFirebaseWebKey(),
+      const [{ initializeApp, getApps }, { getAuth }, { getFirestore }] = await Promise.all([
+        import('firebase/app'), import('firebase/auth'), import('firebase/firestore'),
       ]);
+      // Firebase web API keys are public identifiers; use the project's key directly
+      // so a stale or malformed secret can't break sign-in.
+      let apiKey = WEB_API_KEY;
+      if (!apiKey) apiKey = (await getFirebaseWebKey()).apiKey.replace(/['"\s]/g, '');
       if (!apiKey) throw new Error('Firebase API key is missing');
       const app = getApps()[0] ?? initializeApp({ ...baseConfig, apiKey });
       return { app, auth: getAuth(app), db: getFirestore(app) };
