@@ -17,7 +17,7 @@ import { HomeCardStack } from '@/components/home-card-stack';
 import { FirstTimeTour } from '@/components/first-time-tour';
 import { expenseTrend, investmentTrend, monthKey, recurringTrend, savingsTrend } from '@/lib/finance-trends';
 import { Input } from '@/components/ui/input';
-import { useLedger, categories, money, monthEntries, netWorth, total, type Entry, type EntryType } from '@/store/ledger';
+import { useLedger, categories, allCategories, renameCategory, removeCategory, money, monthEntries, netWorth, total, type Entry, type EntryType } from '@/store/ledger';
 import { localAuth } from '@/lib/auth';
 import { firebase, authMessage } from '@/lib/firebase';
 import { startSync } from '@/lib/cloud-sync';
