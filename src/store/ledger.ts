@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type EntryType = 'expense' | 'income' | 'transfer' | 'saving' | 'investment';
-export type Entry = { id: string; title: string; amount: number; type: EntryType; category: string; date: string; time?: string | undefined; note?: string; tags?: string[]; location?: string; goalId?: string; splitWith?: string; receipt?: string };
+export type PayMethod = 'UPI' | 'Cash' | 'Card';
+export type Entry = { method?: PayMethod | undefined; id: string; title: string; amount: number; type: EntryType; category: string; date: string; time?: string | undefined; note?: string; tags?: string[]; location?: string; goalId?: string; splitWith?: string; receipt?: string };
 export type Goal = { id: string; name: string; target: number; saved: number; deadline: string };
 export type Holding = { id: string; name: string; kind: string; qty: number; buyPrice: number; currentValue: number; date: string; valuations?: { date: string; value: number }[]; symbol?: string | undefined; priceCurrency?: string | undefined; lastPrice?: number | undefined; priceAt?: string | undefined; rate?: number | undefined };
 export type Recurring = { id: string; title: string; amount: number; type: 'income' | 'expense'; category: string; nextDue: string; frequency: 'once' | 'weekly' | 'monthly'; active: boolean };
@@ -14,11 +15,11 @@ export type Loan = { id: string; name: string; principal: number; rate: number; 
 export type Profile = { name: string; email: string; passwordHash?: string; currency: string; pinHash?: string };
 export const categories = ['Food & Drink', 'Groceries', 'Shopping', 'Transport', 'Bills', 'Health', 'Entertainment', 'Travel', 'Salary', 'Other'];
 type State = {
-  profile: Profile | null; session: boolean; onboarded: boolean; walkthroughSeen: boolean; theme: 'light' | 'dark'; entries: Entry[]; goals: Goal[]; holdings: Holding[]; recurring: Recurring[]; rules: Rule[]; budgets: Record<string, number>; monthlyIncome: number; dailyCap: number; globalCap: number; rollover: boolean; customCategories: string[]; hiddenCategories: string[]; rates: Record<string, number>; notifications: boolean; otherAssets: number; borrowedBalance: number; borrows: Borrow[]; loans: Loan[]; assets: Asset[];
+  profile: Profile | null; session: boolean; onboarded: boolean; walkthroughSeen: boolean; theme: 'light' | 'dark'; entries: Entry[]; goals: Goal[]; holdings: Holding[]; recurring: Recurring[]; rules: Rule[]; budgets: Record<string, number>; monthlyIncome: number; dailyCap: number; globalCap: number; rollover: boolean; customCategories: string[]; hiddenCategories: string[]; categoryIcons: Record<string, string>; rates: Record<string, number>; notifications: boolean; otherAssets: number; borrowedBalance: number; borrows: Borrow[]; loans: Loan[]; assets: Asset[];
   set: (patch: Partial<Omit<State, 'set' | 'addEntry' | 'updateEntry' | 'removeEntry' | 'processRecurring' | 'loadDemo' | 'reset'>>) => void;
   addEntry: (entry: Omit<Entry, 'id'>) => void; updateEntry: (id: string, entry: Partial<Entry>) => void; removeEntry: (id: string) => void; processRecurring: () => void; loadDemo: () => void; reset: () => void;
 };
-const initial = { profile: null, session: false, onboarded: false, walkthroughSeen: false, theme: 'light' as const, entries: [] as Entry[], goals: [] as Goal[], holdings: [] as Holding[], recurring: [] as Recurring[], rules: [] as Rule[], budgets: {} as Record<string, number>, monthlyIncome: 0, dailyCap: 0, globalCap: 0, rollover: false, customCategories: [] as string[], hiddenCategories: [] as string[], rates: { EUR: .92, GBP: .79, INR: 83 } as Record<string, number>, notifications: true, otherAssets: 0, borrowedBalance: 0, borrows: [] as Borrow[], loans: [] as Loan[], assets: [] as Asset[] };
+const initial = { profile: null, session: false, onboarded: false, walkthroughSeen: false, theme: 'light' as const, entries: [] as Entry[], goals: [] as Goal[], holdings: [] as Holding[], recurring: [] as Recurring[], rules: [] as Rule[], budgets: {} as Record<string, number>, monthlyIncome: 0, dailyCap: 0, globalCap: 0, rollover: false, customCategories: [] as string[], hiddenCategories: [] as string[], categoryIcons: {} as Record<string, string>, rates: { EUR: .92, GBP: .79, INR: 83 } as Record<string, number>, notifications: true, otherAssets: 0, borrowedBalance: 0, borrows: [] as Borrow[], loans: [] as Loan[], assets: [] as Asset[] };
 const id = () => crypto.randomUUID();
 export const useLedger = create<State>()(persist((set, get) => ({
   ...initial,
@@ -85,5 +86,6 @@ export function renameCategory(from: string, to: string) {
     recurring: s.recurring.map(r => r.category === from ? { ...r, category: to } : r),
     rules: s.rules.map(r => r.category === from ? { ...r, category: to } : r),
     budgets,
+    categoryIcons: (() => { const m = { ...s.categoryIcons }; if (from in m) { m[to] = m[from] ?? ''; delete m[from]; } return m; })(),
   });
 }

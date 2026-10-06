@@ -9,12 +9,14 @@ type HomeCardStackProps = {
   saved: number;
   investments: number;
   netWorth: number;
+  onSelect?: ((index: number) => void) | undefined;
 };
 
-export function HomeCardStack({ name, currency, spent, saved, investments, netWorth }: HomeCardStackProps) {
+export function HomeCardStack({ name, currency, spent, saved, investments, netWorth, onSelect }: HomeCardStackProps) {
   const [active, setActive] = useState(0);
   const touchStart = useRef<number | null>(null);
   const lastStep = useRef(0);
+  const swiped = useRef(false);
   const cards = [
     { label: 'LEDGERLY · YOUR MONEY', value: money(netWorth, currency), detail: 'NET WORTH' },
     { label: 'MONTHLY SPENDING', value: money(spent, currency), detail: 'This month' },
@@ -40,26 +42,30 @@ export function HomeCardStack({ name, currency, spent, saved, investments, netWo
     onTouchStart={event => { touchStart.current = event.touches[0]?.clientY ?? null; }}
     onTouchEnd={event => {
       const end = event.changedTouches[0]?.clientY;
-      if (touchStart.current !== null && end !== undefined && Math.abs(end - touchStart.current) > 25) rotate(end < touchStart.current ? 1 : -1);
+      if (touchStart.current !== null && end !== undefined && Math.abs(end - touchStart.current) > 25) { rotate(end < touchStart.current ? 1 : -1); swiped.current = true; setTimeout(() => { swiped.current = false; }, 400); }
       touchStart.current = null;
     }}
     onKeyDown={event => {
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault();
         rotate(event.key === 'ArrowDown' ? 1 : -1);
-      }
+      } else if (event.key === 'Enter') onSelect?.(active);
     }}
   >
     {cards.map(({ label, value, detail }, index) => {
       const position = (index - active + cards.length) % cards.length;
       return <motion.div
         key={label}
-        className="home-card glass absolute inset-x-0 top-8 h-32 rounded-[30px] p-4 flex flex-col justify-between"
+        className="home-card glass absolute inset-x-0 top-8 h-32 rounded-[30px] p-4 flex flex-col cursor-pointer justify-between"
         style={{ zIndex: cards.length - position }}
         initial={false}
         animate={{ y: -position * 10, scale: 1 - position * .045, opacity: 1 - position * .16 }}
         transition={{ type: 'spring', stiffness: 260, damping: 29 }}
         aria-hidden={position !== 0}
+        onClick={() => { if (position === 0 && !swiped.current) onSelect?.(index); }}
+        whileTap={{ scale: position === 0 ? 0.98 : 1 - position * .045 }}
+        role={position === 0 ? 'button' : undefined}
+        aria-label={position === 0 ? `Open ${label.toLowerCase()} details` : undefined}
       >
         <div className="flex justify-between items-center gap-3"><span className="text-xs opacity-70">{label}</span><span className="text-lg font-bold italic opacity-70">L.</span></div>
         <div className="flex justify-between items-end gap-3"><span className="text-xl font-semibold truncate" title={value}>{value}</span><span className="text-xs opacity-70 text-right shrink-0">{detail}</span></div>

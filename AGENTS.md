@@ -11,3 +11,5 @@
 - Generate reminders (EMIs, borrow repayments, recurring bills, budgets) on the device from stored records and show them as browser notifications or toasts; there is no server push.
 - Keep non-home financial pages inside the shared homepage-derived gradient-header and overlapping-sheet shell so page styling stays consistent.
 - Persist completion of the first-use product tour with the ledger store so it appears only once per user dataset.
+- Keep category icon choices as icon keys in the store (categoryIcons) resolved via src/lib/category-icons.ts; keys stay serializable for cloud sync.
+- Read receipts and UPI screenshots with on-device OCR (tesseract.js, lazy-loaded); no server or AI call is needed.
