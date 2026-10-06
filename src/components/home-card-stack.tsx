@@ -63,7 +63,7 @@ export function HomeCardStack({ name, currency, spent, saved, investments, netWo
         transition={{ type: 'spring', stiffness: 260, damping: 29 }}
         aria-hidden={position !== 0}
         onClick={() => { if (position === 0 && !swiped.current) onSelect?.(index); }}
-        whileTap={position === 0 ? { scale: 0.98 } : undefined}
+        whileTap={{ scale: position === 0 ? 0.98 : 1 - position * .045 }}
         role={position === 0 ? 'button' : undefined}
         aria-label={position === 0 ? `Open ${label.toLowerCase()} details` : undefined}
       >

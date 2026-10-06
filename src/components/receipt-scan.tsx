@@ -25,7 +25,7 @@ function parseReceipt(text: string, cats: string[]): Omit<Draft, 'category'> & {
   const low = text.toLowerCase();
   const guess = cats.find(c => low.includes(c.toLowerCase())) ?? (/restaurant|cafe|coffee|food|swiggy|zomato/i.test(text) ? 'Food & Drink' : /mart|grocery|supermarket|bigbasket|blinkit/i.test(text) ? 'Groceries' : /fuel|petrol|uber|ola|metro/i.test(text) ? 'Transport' : cats.includes('Other') ? 'Other' : cats[0] ?? 'Other');
   let date = format(new Date(), 'yyyy-MM-dd');
-  const d = text.match(/(\d{1,2})[\s/-]([A-Za-z]{3,9}|\d{1,2})[\s/-,]+(\d{2,4})/);
+  const d = text.match(/(\d{1,2})[\s/-]([A-Za-z]{3,9}|\d{1,2})[\s/,-]+(\d{2,4})/);
   if (d) { const parsed = new Date(`${d[1]} ${d[2]} ${d[3]?.length === 2 ? `20${d[3]}` : d[3]}`); if (!isNaN(parsed.getTime()) && parsed <= new Date()) date = format(parsed, 'yyyy-MM-dd'); }
   return { title: title.slice(0, 60), amount: amount ? String(amount) : '', category: cats.includes(guess) ? guess : cats[0] ?? 'Other', method: card ? 'Card' : upi ? 'UPI' : 'Cash', date };
 }
