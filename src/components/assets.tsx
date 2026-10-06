@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { Building2, Car, Coins, Gem, Landmark, Package, Pencil, Trash2, Wallet, X, type LucideIcon } from 'lucide-react';
+import { Building2, Car, Coins, Gem, Landmark, Package, Pencil, PiggyBank, TrendingUp, Trash2, Wallet, X, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { money, useLedger, type Asset } from '@/store/ledger';
 
@@ -53,6 +53,22 @@ export function AssetsPage() {
         <Button variant="ghost" size="icon" className="pill shrink-0" aria-label={`Edit ${a.name}`} onClick={() => { setEditId(a.id); setForm({ name: a.name, kind: a.kind, value: String(a.value), purchase: a.purchaseValue !== undefined ? String(a.purchaseValue) : '', date: a.date, note: a.note ?? '' }); }}><Pencil size={15} /></Button>
         <Button variant="ghost" size="icon" className="pill shrink-0" aria-label={`Delete ${a.name}`} onClick={() => { if (confirm(`Delete ${a.name}?`)) s.set({ assets: s.assets.filter(x => x.id !== a.id) }); }}><Trash2 size={15} /></Button>
       </div>; }) : <p className="text-sm text-muted-foreground text-center py-6">Add your home, car, bank balances, gold and more.</p>}
+    </div>
+    <div className="panel p-5">
+      <h2 className="font-semibold mb-2">Savings</h2>
+      {s.goals.length ? s.goals.map(g => <div key={g.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-3 border-b last:border-0">
+        <span className="w-11 h-11 rounded-full bg-secondary grid place-items-center"><PiggyBank size={18} /></span>
+        <div className="min-w-0"><p className="font-medium truncate">{g.name}</p><p className="text-xs text-muted-foreground">{g.target ? `${Math.round(g.saved / g.target * 100)}% of ${money(g.target, currency)}` : 'Savings goal'}</p></div>
+        <p className="font-semibold tabular-nums">{money(g.saved, currency)}</p>
+      </div>) : <p className="text-sm text-muted-foreground text-center py-4">No savings goals yet.</p>}
+    </div>
+    <div className="panel p-5">
+      <h2 className="font-semibold mb-2">Investments</h2>
+      {s.holdings.length ? s.holdings.map(h => { const pl = h.currentValue - h.qty * h.buyPrice; return <div key={h.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-3 border-b last:border-0">
+        <span className="w-11 h-11 rounded-full bg-secondary grid place-items-center"><TrendingUp size={18} /></span>
+        <div className="min-w-0"><p className="font-medium truncate">{h.name}</p><p className="text-xs text-muted-foreground truncate">{h.kind}{h.symbol ? ` · ${h.symbol}` : ''}</p></div>
+        <div className="text-right"><p className="font-semibold tabular-nums">{money(h.currentValue, currency)}</p><p className={`text-xs ${pl >= 0 ? 'text-positive' : 'text-destructive'}`}>{pl >= 0 ? '+' : ''}{money(pl, currency)}</p></div>
+      </div>; }) : <p className="text-sm text-muted-foreground text-center py-4">No investments yet.</p>}
     </div>
     <p className="text-xs text-muted-foreground text-center">Asset values count toward the net worth on your home card.</p>
 
