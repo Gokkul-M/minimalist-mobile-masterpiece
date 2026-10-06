@@ -160,7 +160,7 @@ export function ExpenseCategoryChart({ entries, categories, currency = 'USD' }: 
               <span className="max-w-24 truncate">{selected.length === categories.length ? 'All categories' : `${selected.length} selected`}</span><ChevronDown />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64 max-h-80 rounded-xl p-2">
+          <DropdownMenuContent align="end" className="w-64 max-h-80 rounded-xl p-2 bg-white text-foreground border border-black/5 shadow-lg">
             <DropdownMenuLabel className="flex items-center justify-between gap-2">
               Categories
               <span className="flex gap-1">
