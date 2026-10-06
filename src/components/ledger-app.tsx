@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { format, differenceInCalendarDays, endOfMonth, startOfMonth, subMonths, isSameDay } from 'date-fns';
 import { ResponsiveContainer, Tooltip, PieChart, Pie, Cell } from 'recharts';
@@ -28,6 +28,7 @@ import { runReminders, enableDeviceNotifications } from '@/lib/reminders';
 import { registerOffline } from '@/lib/pwa';
 
 type Page = 'Home' | 'Transactions' | 'Expenses' | 'Budgets' | 'Savings' | 'Investments' | 'Recurring' | 'Borrows' | 'Loans' | 'Assets' | 'Insights' | 'Settings';
+const GoContext = createContext<(p: Page) => void>(() => {});
 const navigation: { label: Page; icon: LucideIcon }[] = [{label:'Home',icon:Home},{label:'Transactions',icon:Repeat2},{label:'Expenses',icon:PieIcon},{label:'Budgets',icon:Wallet},{label:'Savings',icon:Target},{label:'Investments',icon:TrendingUp},{label:'Recurring',icon:CalendarDays},{label:'Borrows',icon:HandCoins},{label:'Loans',icon:Landmark},{label:'Assets',icon:Gem},{label:'Insights',icon:Sparkles},{label:'Settings',icon:Settings2}];
 const mobileNav = navigation.slice(0,5);
 const categoryIcon: Record<string, LucideIcon> = { 'Food & Drink': Coffee, Groceries: ShoppingBag, Shopping: ShoppingBag, Transport: ArrowRight, Bills: Wallet, Health: ShieldCheck, Entertainment: Sparkles, Travel: CalendarDays, Salary: ArrowDownLeft, Other: MoreHorizontal };
