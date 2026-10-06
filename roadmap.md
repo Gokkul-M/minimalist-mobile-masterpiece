@@ -12,4 +12,5 @@
 - [x] Borrows/loans editing, history, prepay; Assets page; investment tips + live prices; 44px budget dropdown.
 - [x] Align every non-home page with the homepage's gradient header, overlapping sheet, spacing, and title hierarchy.
 - [x] Replace the Expenses all-category list with a filterable, zoomable multi-line chart.
+- [x] Make expense analytics zoom through hourly, daily, weekly, monthly, and yearly views with refined line styling.
 - [x] Add a first-use guided tour, branded loading feedback, and consistent page transitions.

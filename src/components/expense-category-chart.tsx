@@ -20,30 +20,88 @@ const LINE_COLORS = [
   'var(--muted-foreground)',
 ];
 
-type ChartRow = { date: string; label: string } & Record<string, string | number>;
+type Granularity = 'hour' | 'day' | 'week' | 'month' | 'year';
+type ChartRow = { timestamp: number; label: string } & Record<string, string | number>;
 
-function labelFor(date: string) {
-  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(`${date}T12:00:00`));
+const LEVELS: { key: Granularity; label: string; noun: string }[] = [
+  { key: 'hour', label: 'Hourly', noun: 'hours' },
+  { key: 'day', label: 'Daily', noun: 'days' },
+  { key: 'week', label: 'Weekly', noun: 'weeks' },
+  { key: 'month', label: 'Monthly', noun: 'months' },
+  { key: 'year', label: 'Yearly', noun: 'years' },
+];
+
+function entryDate(entry: Entry) {
+  return new Date(`${entry.date}T${entry.time || '12:00'}:00`);
+}
+
+function floorDate(date: Date, level: Granularity) {
+  const result = new Date(date);
+  result.setSeconds(0, 0);
+  if (level !== 'hour') result.setHours(0);
+  if (level === 'week') {
+    const day = result.getDay();
+    result.setDate(result.getDate() - (day === 0 ? 6 : day - 1));
+  }
+  if (level === 'month') result.setDate(1);
+  if (level === 'year') result.setMonth(0, 1);
+  return result;
+}
+
+function addUnit(date: Date, level: Granularity) {
+  const next = new Date(date);
+  if (level === 'hour') next.setHours(next.getHours() + 1);
+  if (level === 'day') next.setDate(next.getDate() + 1);
+  if (level === 'week') next.setDate(next.getDate() + 7);
+  if (level === 'month') next.setMonth(next.getMonth() + 1);
+  if (level === 'year') next.setFullYear(next.getFullYear() + 1);
+  return next;
+}
+
+function bucketLabel(date: Date, level: Granularity, spansDays: boolean) {
+  if (level === 'hour') return new Intl.DateTimeFormat('en', spansDays ? { month: 'short', day: 'numeric', hour: 'numeric' } : { hour: 'numeric' }).format(date);
+  if (level === 'day') return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(date);
+  if (level === 'week') return `Wk ${new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(date)}`;
+  if (level === 'month') return new Intl.DateTimeFormat('en', { month: 'short', year: '2-digit' }).format(date);
+  return String(date.getFullYear());
 }
 
 export function ExpenseCategoryChart({ entries, categories, currency = 'USD' }: { entries: Entry[]; categories: string[]; currency?: string | undefined }) {
   const [selected, setSelected] = useState<string[]>(categories);
-  const [range, setRange] = useState({ start: 0, end: 1 });
+  const [levelIndex, setLevelIndex] = useState(1);
   const chartRef = useRef<HTMLDivElement>(null);
-  const rangeRef = useRef(range);
+  const levelRef = useRef(levelIndex);
   const knownCategories = useRef(new Set(categories));
+  const level = LEVELS[levelIndex]?.key ?? 'day';
 
   const data = useMemo<ChartRow[]>(() => {
-    const dates = [...new Set(entries.map(entry => entry.date))].sort();
-    return dates.map(date => {
-      const row: ChartRow = { date, label: labelFor(date) };
+    if (!entries.length) return [];
+    const entryDates = entries.map(entryDate).sort((a, b) => a.getTime() - b.getTime());
+    let start = floorDate(entryDates[0] ?? new Date(), level);
+    let end = floorDate(entryDates[entryDates.length - 1] ?? new Date(), level);
+    if (level === 'hour') {
+      start = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+      end = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23);
+    }
+    const rows = new Map<number, ChartRow>();
+    const spansDays = start.toDateString() !== end.toDateString();
+    let cursor = start;
+    let guard = 0;
+    while (cursor <= end && guard < 10000) {
+      const timestamp = cursor.getTime();
+      const row: ChartRow = { timestamp, label: bucketLabel(cursor, level, spansDays) };
       categories.forEach(category => { row[category] = 0; });
-      entries.filter(entry => entry.date === date).forEach(entry => {
-        row[entry.category] = Number(row[entry.category] ?? 0) + entry.amount;
-      });
-      return row;
+      rows.set(timestamp, row);
+      cursor = addUnit(cursor, level);
+      guard += 1;
+    }
+    entries.forEach(entry => {
+      const timestamp = floorDate(entryDate(entry), level).getTime();
+      const row = rows.get(timestamp);
+      if (row) row[entry.category] = Number(row[entry.category] ?? 0) + entry.amount;
     });
-  }, [categories, entries]);
+    return [...rows.values()];
+  }, [categories, entries, level]);
 
   useEffect(() => {
     const additions = categories.filter(category => !knownCategories.current.has(category));
@@ -51,26 +109,12 @@ export function ExpenseCategoryChart({ entries, categories, currency = 'USD' }: 
     setSelected(current => [...current.filter(category => categories.includes(category)), ...additions]);
   }, [categories]);
 
-  useEffect(() => {
-    const next = { start: 0, end: Math.max(1, data.length - 1) };
-    rangeRef.current = next;
-    setRange(next);
-  }, [data.length]);
-
-  const setZoom = (next: { start: number; end: number }) => {
-    rangeRef.current = next;
-    setRange(next);
-  };
-
-  const zoom = (direction: 'in' | 'out', anchor = 0.5) => {
-    if (data.length < 3) return;
-    const current = rangeRef.current;
-    const width = current.end - current.start + 1;
-    const nextWidth = Math.max(2, Math.min(data.length, Math.round(width * (direction === 'in' ? 0.72 : 1.38))));
-    const anchorIndex = current.start + (width - 1) * anchor;
-    let start = Math.round(anchorIndex - (nextWidth - 1) * anchor);
-    start = Math.max(0, Math.min(data.length - nextWidth, start));
-    setZoom({ start, end: start + nextWidth - 1 });
+  const zoom = (direction: 'in' | 'out') => {
+    setLevelIndex(current => {
+      const next = Math.max(0, Math.min(LEVELS.length - 1, current + (direction === 'in' ? -1 : 1)));
+      levelRef.current = next;
+      return next;
+    });
   };
 
   useEffect(() => {
@@ -78,26 +122,38 @@ export function ExpenseCategoryChart({ entries, categories, currency = 'USD' }: 
     if (!element) return;
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault();
-      const rect = element.getBoundingClientRect();
-      const anchor = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
       const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 100 : 1);
-      zoom(delta < 0 ? 'in' : 'out', anchor);
+      if (Math.abs(delta) < 8) return;
+      const next = Math.max(0, Math.min(LEVELS.length - 1, levelRef.current + (delta < 0 ? -1 : 1)));
+      if (next !== levelRef.current) {
+        levelRef.current = next;
+        setLevelIndex(next);
+      }
     };
     element.addEventListener('wheel', handleWheel, { passive: false });
     return () => element.removeEventListener('wheel', handleWheel);
-  });
+  }, []);
 
-  const visibleData = data.slice(range.start, range.end + 1);
-  const atFullRange = range.start === 0 && range.end >= data.length - 1;
   const toggle = (category: string, checked: boolean) => setSelected(current => checked ? [...current, category] : current.filter(item => item !== category));
+  const currentLevel = LEVELS[levelIndex] ?? LEVELS[1];
+  const zoomInLevel = LEVELS[levelIndex - 1];
+  const zoomOutLevel = LEVELS[levelIndex + 1];
+  const periodLabel = entries.length ? (() => {
+    const ordered = entries.map(entryDate).sort((a, b) => a.getTime() - b.getTime());
+    const first = ordered[0];
+    const last = ordered[ordered.length - 1];
+    if (!first || !last) return '';
+    const formatter = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: first.getFullYear() === last.getFullYear() ? undefined : 'numeric' });
+    return first.toDateString() === last.toDateString() ? formatter.format(first) : `${formatter.format(first)} – ${formatter.format(last)}`;
+  })() : '';
 
   return <section className="panel p-4 sm:p-5 mt-8 mb-8" aria-label="Expense categories chart">
-    <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
+    <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
       <div>
         <h2 className="text-lg font-semibold">All categories</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">Compare spending over time</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{periodLabel || 'Compare spending over time'}</p>
       </div>
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 max-w-full">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="sm" className="pill min-w-0 px-3" aria-label="Choose expense categories">
@@ -125,24 +181,31 @@ export function ExpenseCategoryChart({ entries, categories, currency = 'USD' }: 
             </DropdownMenuCheckboxItem>)}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button variant="secondary" size="icon" className="h-9 w-9" aria-label="Zoom out" title="Zoom out" disabled={atFullRange || data.length < 3} onClick={() => zoom('out')}><Minus /></Button>
-        <Button variant="secondary" size="icon" className="h-9 w-9" aria-label="Zoom in" title="Zoom in" disabled={data.length < 3 || range.end - range.start < 2} onClick={() => zoom('in')}><Plus /></Button>
-        <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Reset zoom" title="Reset zoom" disabled={atFullRange} onClick={() => setZoom({ start: 0, end: Math.max(1, data.length - 1) })}><RotateCcw /></Button>
+        <Button variant="secondary" size="icon" className="h-9 w-9 shrink-0" aria-label={`Zoom out${zoomOutLevel ? ` to ${zoomOutLevel.noun}` : ''}`} title={zoomOutLevel ? `Show ${zoomOutLevel.noun}` : 'Maximum zoom out'} disabled={!zoomOutLevel || !data.length} onClick={() => zoom('out')}><Minus /></Button>
+        <Button variant="secondary" size="icon" className="h-9 w-9 shrink-0" aria-label={`Zoom in${zoomInLevel ? ` to ${zoomInLevel.noun}` : ''}`} title={zoomInLevel ? `Show ${zoomInLevel.noun}` : 'Maximum zoom in'} disabled={!zoomInLevel || !data.length} onClick={() => zoom('in')}><Plus /></Button>
+        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" aria-label="Reset to days" title="Reset to daily view" disabled={levelIndex === 1} onClick={() => { levelRef.current = 1; setLevelIndex(1); }}><RotateCcw /></Button>
       </div>
     </div>
+    <div className="flex items-center justify-between gap-3 mb-3">
+      <span className="pill bg-secondary px-3 py-1.5 text-xs font-medium">{currentLevel?.label} view</span>
+      <span className="text-[11px] text-muted-foreground text-right">− {zoomOutLevel ? zoomOutLevel.noun : 'years'} · + {zoomInLevel ? zoomInLevel.noun : 'hours'}</span>
+    </div>
     {data.length && selected.length ? <>
-      <div ref={chartRef} className="h-72 w-full min-w-0 touch-pan-y" role="img" aria-label={`Expense lines for ${selected.join(', ')}`}>
+      <div ref={chartRef} className="h-72 w-full min-w-0 touch-none rounded-2xl bg-secondary/40 pt-3" role="img" aria-label={`${currentLevel?.label} expense lines for ${selected.join(', ')}`}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={visibleData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke="var(--border)" />
+          <LineChart data={data} margin={{ top: 8, right: 12, left: -18, bottom: 4 }}>
+            <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="2 6" />
             <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} interval="preserveStartEnd" />
             <YAxis tickLine={false} axisLine={false} width={54} domain={[0, 'auto']} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} tickFormatter={value => Intl.NumberFormat('en', { notation: 'compact' }).format(Number(value))} />
-            <Tooltip formatter={(value, name) => [money(Number(value), currency), String(name)]} labelFormatter={label => String(label)} contentStyle={{ background: 'var(--card)', borderColor: 'var(--border)', borderRadius: 8, color: 'var(--foreground)' }} />
-            {categories.filter(category => selected.includes(category)).map((category, index) => <Line key={category} type="monotone" dataKey={category} name={category} stroke={LINE_COLORS[categories.indexOf(category) % LINE_COLORS.length]} strokeWidth={2.5} dot={{ r: 2 }} activeDot={{ r: 5 }} connectNulls isAnimationActive={false} strokeDasharray={index >= LINE_COLORS.length ? `${4 + index % 3} ${2 + index % 2}` : undefined} />)}
+            <Tooltip cursor={{ stroke: 'var(--muted-foreground)', strokeWidth: 1, strokeDasharray: '3 4' }} formatter={(value, name) => [money(Number(value), currency), String(name)]} labelFormatter={label => `${currentLevel?.label} · ${String(label)}`} contentStyle={{ background: 'var(--card)', borderColor: 'var(--border)', borderRadius: 12, color: 'var(--foreground)', boxShadow: '0 12px 30px color-mix(in oklch, var(--foreground) 12%, transparent)' }} />
+            {categories.filter(category => selected.includes(category)).map((category, index) => <Line key={category} type="monotone" dataKey={category} name={category} stroke={LINE_COLORS[categories.indexOf(category) % LINE_COLORS.length]} strokeWidth={1.6} dot={data.length <= 2 ? { r: 2.5, strokeWidth: 0 } : false} activeDot={{ r: 4, strokeWidth: 2, fill: 'var(--card)' }} connectNulls isAnimationActive={false} strokeLinecap="round" strokeLinejoin="round" strokeDasharray={index >= LINE_COLORS.length ? `${5 + index % 3} ${3 + index % 2}` : undefined} />)}
           </LineChart>
         </ResponsiveContainer>
       </div>
-      <p className="text-[11px] text-muted-foreground mt-2">Scroll over the chart to zoom · Hover or tap a point for details</p>
+      <div className="flex items-center gap-3 overflow-x-auto scrollbar-hidden mt-3 pb-0.5" aria-label="Visible category legend">
+        {categories.filter(category => selected.includes(category)).map(category => <span key={category} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground whitespace-nowrap"><span className="h-1.5 w-5 rounded-full" style={{ backgroundColor: LINE_COLORS[categories.indexOf(category) % LINE_COLORS.length] }} />{category}</span>)}
+      </div>
+      <p className="text-[11px] text-muted-foreground mt-2">Scroll to move between hours, days, weeks, months and years · Tap a point for details</p>
     </> : <div className="h-56 grid place-items-center text-center px-6"><div><p className="font-medium">{data.length ? 'No categories selected' : 'No expenses in this period'}</p><p className="text-sm text-muted-foreground mt-1">{data.length ? 'Choose categories from the menu to compare them.' : 'Your category lines will appear after you add an expense.'}</p></div></div>}
   </section>;
 }
