@@ -44,7 +44,7 @@ export function InvestmentsPage() {
   const [name, setName] = useState(''); const [kind, setKind] = useState('Stocks'); const [symbol, setSymbol] = useState('');
   const [rate, setRate] = useState(''); const [qty, setQty] = useState(''); const [buy, setBuy] = useState(''); const [value, setValue] = useState('');
   const [results, setResults] = useState<{ symbol: string; name: string; exchange: string }[]>([]);
-  const [rates, setRates] = useState<Record<string, number>>({}); const [loading, setLoading] = useState(false); const [lastAt, setLastAt] = useState<string | null>(null);
+  const [rates, setRates] = useState<{ gold: number; silver: number }>({ gold: 0, silver: 0 }); const [loading, setLoading] = useState(false); const [lastAt, setLastAt] = useState<string | null>(null);
   const invested = s.holdings.reduce((a, h) => a + h.qty * h.buyPrice, 0);
   const current = s.holdings.reduce((a, h) => a + h.currentValue, 0); const gain = current - invested;
 
