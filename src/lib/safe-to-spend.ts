@@ -5,7 +5,8 @@ export type SafeDay = { date: string; allowance: number; spent: number };
 
 /**
  * Daily allowance = monthly base ÷ days in month. Whatever is left unspent on a
- * day (or overspent) is carried in full into the next day's allowance.
+ * day is carried in full into the next day's allowance. Overspending does NOT
+ * reduce the next day — each day starts from the full base amount.
  */
 export function safeToSpendHistory(entries: Entry[], base: number, today = new Date()): SafeDay[] {
   const start = startOfMonth(today);
