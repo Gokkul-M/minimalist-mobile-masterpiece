@@ -8,7 +8,7 @@ async function chartPrice(symbol: string): Promise<{ price: number; currency: st
   // Metals priced per gram from COMEX futures (USD per troy ounce).
   if (symbol === 'GOLD-G' || symbol === 'SILVER-G') {
     const q = await chartPrice(symbol === 'GOLD-G' ? 'GC=F' : 'SI=F');
-    return q ? { price: (q.price / OZ) * (symbol === 'GOLD-G' ? 22 / 24 : 1), currency: 'USD' } : null;
+    return q ? { price: q.price / OZ, currency: 'USD' } : null;
   }
   // Indian mutual funds: latest NAV by AMFI scheme code.
   if (symbol.startsWith('MF:')) {

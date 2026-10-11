@@ -44,7 +44,7 @@ export function InvestmentsPage() {
   const [name, setName] = useState(''); const [kind, setKind] = useState('Stocks'); const [symbol, setSymbol] = useState('');
   const [rate, setRate] = useState(''); const [qty, setQty] = useState(''); const [buy, setBuy] = useState(''); const [value, setValue] = useState('');
   const [results, setResults] = useState<{ symbol: string; name: string; exchange: string }[]>([]);
-  const [rates, setRates] = useState<{ gold: number; silver: number }>({ gold: 0, silver: 0 }); const [loading, setLoading] = useState(false); const [lastAt, setLastAt] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false); const [lastAt, setLastAt] = useState<string | null>(null);
   const invested = s.holdings.reduce((a, h) => a + h.qty * h.buyPrice, 0);
   const current = s.holdings.reduce((a, h) => a + h.currentValue, 0); const gain = current - invested;
 
@@ -52,10 +52,10 @@ export function InvestmentsPage() {
     const day0 = todayKey();
     useLedger.getState().set({ holdings: useLedger.getState().holdings.map(h => { if (!isFixed(h.kind) || !h.rate) return h; const v = fixedValue(h); return { ...h, currentValue: v, priceAt: new Date().toISOString(), valuations: [...(h.valuations ?? []).filter(x => x.date !== day0), { date: day0, value: v }] }; }) });
     const hs = useLedger.getState().holdings.filter(h => h.symbol);
+    if (!hs.length) return;
     setLoading(true);
     try {
-      const { quotes, at } = await getQuotes({ data: { symbols: [...new Set([...hs.map(h => h.symbol!.toUpperCase()), 'GOLD-G', 'SILVER-G'])], currency } });
-      setRates({ gold: quotes['GOLD-G']?.price ?? 0, silver: quotes['SILVER-G']?.price ?? 0 });
+      const { quotes, at } = await getQuotes({ data: { symbols: hs.map(h => h.symbol!), currency } });
       const day = todayKey(); let failed = 0;
       useLedger.getState().set({ holdings: useLedger.getState().holdings.map(h => {
         const q = h.symbol ? quotes[h.symbol.toUpperCase()] : undefined;
@@ -69,7 +69,7 @@ export function InvestmentsPage() {
     finally { setLoading(false); }
   }, [currency]);
 
-  useEffect(() => { void refresh(true); const t = setInterval(() => void refresh(true), 15000); return () => clearInterval(t); }, [refresh]);
+  useEffect(() => { void refresh(true); const t = setInterval(() => void refresh(true), 60000); return () => clearInterval(t); }, [refresh]);
 
   const lookup = async () => { if (!name.trim()) return; const r = await searchSymbols({ data: { q: name.trim(), kind } }); setResults(r); if (!r.length) toast('No matching ticker found'); };
 
@@ -91,8 +91,7 @@ export function InvestmentsPage() {
       <div className="flex justify-between items-start"><p className="text-sm opacity-70">Portfolio value</p><Button variant="ghost" size="icon" className="pill text-hero-foreground hover:bg-hero-foreground/10" aria-label="Refresh prices" onClick={() => void refresh()} disabled={loading}><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /></Button></div>
       <p className="text-4xl font-semibold mt-1">{money(current, currency)}</p>
       <p className="text-sm opacity-80 mt-3">Invested {money(invested, currency)} · <span className="inline-block rounded-full bg-[var(--glass)] px-2 py-0.5 font-semibold whitespace-nowrap">{gain >= 0 ? '+' : ''}{money(gain, currency)} ({invested ? (gain / invested * 100).toFixed(1) : 0}%)</span></p>
-      {(rates.gold || rates.silver) ? <div className="grid grid-cols-2 gap-2 mt-4"><div className="rounded-2xl bg-[var(--glass)] px-3 py-2"><p className="text-[11px] opacity-70">Gold 22K / gram</p><p className="font-semibold">{rates.gold ? money(rates.gold, currency) : '—'}</p></div><div className="rounded-2xl bg-[var(--glass)] px-3 py-2"><p className="text-[11px] opacity-70">Silver / gram</p><p className="font-semibold">{rates.silver ? money(rates.silver, currency) : '—'}</p></div></div> : null}
-      {lastAt && <p className="text-xs opacity-60 mt-1">Live prices updated {formatDistanceToNow(new Date(lastAt), { addSuffix: true })} · refreshes every 15 seconds</p>}
+      {lastAt && <p className="text-xs opacity-60 mt-1">Live prices updated {formatDistanceToNow(new Date(lastAt), { addSuffix: true })} · refreshes every minute</p>}
     </div>
     <div className="panel p-5"><FinanceTrend title="Portfolio performance" points={investmentTrend(s.holdings)} currency={currency} primaryLabel="Current value" comparisonLabel="Amount invested" emptyText="Add a holding to see its performance." />
       <p className={`text-sm font-semibold mt-4 ${gain >= 0 ? 'text-positive' : 'text-destructive'}`}>{gain >= 0 ? 'Unrealized profit' : 'Unrealized loss'}: {gain >= 0 ? '+' : '−'}{money(Math.abs(gain), currency)}</p></div>
@@ -120,12 +119,12 @@ export function InvestmentsPage() {
       <div className="relative"><input className="field w-full" style={{ paddingLeft: 44 }} placeholder={METAL[kind] ? `Name (optional, defaults to ${kind})` : "Name (e.g. Apple, Bitcoin)"} value={name} onChange={e => setName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); void lookup(); } }} /><button type="button" aria-label="Search ticker" onClick={() => void lookup()} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 grid place-items-center rounded-full text-muted-foreground hover:bg-secondary"><Search size={16} /></button></div>
       {!!results.length && <div className="rounded-2xl border divide-y overflow-hidden">{results.map(r => <button key={r.symbol} type="button" className="w-full text-left px-4 py-2 text-sm hover:bg-secondary" onClick={() => { setSymbol(r.symbol); setName(r.name); setResults([]); }}><b>{r.symbol}</b> · {r.name} <span className="text-muted-foreground">{r.exchange}</span></button>)}</div>}
       <div className="grid grid-cols-2 gap-2">
-        <select className="field min-w-0" value={kind} onChange={e => { const k = e.target.value; setKind(k); setSymbol(METAL[k] ?? ''); setResults([]); const ms = METAL[k]; if (ms) { setBuy(''); void getQuotes({ data: { symbols: [ms], currency } }).then(r => { const q = r.quotes[ms]; if (q) { setBuy(String(Math.round(q.price * 100) / 100)); toast.success(`Live ${k === 'Gold' ? '22K gold' : 'silver'} price loaded`); } else toast.error('Could not fetch the live price'); }).catch(() => toast.error('Could not fetch the live price')); } }} aria-label="Type">{KINDS.map(k => <option key={k}>{k}</option>)}</select>
+        <select className="field min-w-0" value={kind} onChange={e => { const k = e.target.value; setKind(k); setSymbol(METAL[k] ?? ''); setResults([]); const ms = METAL[k]; if (ms) { setBuy(''); void getQuotes({ data: { symbols: [ms], currency } }).then(r => { const q = r.quotes[ms]; if (q) { setBuy(String(Math.round(q.price * 100) / 100)); toast.success(`Live ${k.toLowerCase()} price loaded`); } else toast.error('Could not fetch the live price'); }).catch(() => toast.error('Could not fetch the live price')); } }} aria-label="Type">{KINDS.map(k => <option key={k}>{k}</option>)}</select>
         {isFixed(kind) ? <input className="field min-w-0" inputMode="decimal" placeholder="Interest % / year" value={rate} onChange={e => setRate(e.target.value)} />
           : <input className="field min-w-0" placeholder="Ticker (optional)" value={symbol} readOnly={!!METAL[kind]} onChange={e => setSymbol(e.target.value)} />}
         {isFixed(kind) ? <input className="field min-w-0 col-span-2" inputMode="decimal" placeholder="Amount invested" value={buy} onChange={e => setBuy(e.target.value)} /> : <>
         <input className="field min-w-0" inputMode="decimal" placeholder={METAL[kind] ? 'Grams' : 'Quantity'} value={qty} onChange={e => setQty(e.target.value)} />
-        <input className="field min-w-0" inputMode="decimal" placeholder={kind === 'Gold' ? 'Buy price / gram (22K)' : METAL[kind] ? 'Buy price / gram' : 'Buy price / unit'} value={buy} onChange={e => setBuy(e.target.value)} /></>}
+        <input className="field min-w-0" inputMode="decimal" placeholder={METAL[kind] ? 'Buy price / gram' : 'Buy price / unit'} value={buy} onChange={e => setBuy(e.target.value)} /></>}
       </div>
       {!symbol && !isFixed(kind) && <input className="field" inputMode="decimal" placeholder="Current total value (no ticker)" value={value} onChange={e => setValue(e.target.value)} />}
       <p className="text-xs text-muted-foreground">With a ticker, the value updates live from market prices (converted to {currency}). Stocks/ETFs: AAPL, RELIANCE.NS · Crypto: BTC-USD · Mutual funds: search by fund name · Gold & silver: live price per gram · FD / bonds: value grows daily at your interest rate.</p>
