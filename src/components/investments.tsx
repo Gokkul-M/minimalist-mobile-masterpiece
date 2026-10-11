@@ -69,7 +69,7 @@ export function InvestmentsPage() {
     finally { setLoading(false); }
   }, [currency]);
 
-  useEffect(() => { void refresh(true); const t = setInterval(() => void refresh(true), 60000); return () => clearInterval(t); }, [refresh]);
+  useEffect(() => { void refresh(true); const t = setInterval(() => void refresh(true), 15000); return () => clearInterval(t); }, [refresh]);
 
   const lookup = async () => { if (!name.trim()) return; const r = await searchSymbols({ data: { q: name.trim(), kind } }); setResults(r); if (!r.length) toast('No matching ticker found'); };
 
