@@ -22,7 +22,7 @@ export function safeToSpendHistory(entries: Entry[], base: number, today = new D
     const allowance = perDay + carry;
     const spent = out.get(date) || 0;
     days.push({ date, allowance, spent });
-    carry = allowance - spent;
+    carry = Math.max(0, allowance - spent);
   }
   return days;
 }
