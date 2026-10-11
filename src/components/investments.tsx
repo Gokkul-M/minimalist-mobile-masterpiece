@@ -69,7 +69,9 @@ export function InvestmentsPage() {
     finally { setLoading(false); }
   }, [currency]);
 
-  useEffect(() => { void refresh(true); const t = setInterval(() => void refresh(true), 60000); return () => clearInterval(t); }, [refresh]);
+  useEffect(() => { void refresh(true); const t = setInterval(() => void refresh(true), 15000); return () => clearInterval(t); }, [refresh]);
+  const [metals, setMetals] = useState<{ gold?: number; silver?: number }>({});
+  useEffect(() => { const load = () => void getQuotes({ data: { symbols: ['GOLD-G', 'SILVER-G'], currency } }).then((r: any) => { const q = r?.quotes ?? r ?? {}; setMetals({ gold: q['GOLD-G']?.price, silver: q['SILVER-G']?.price }); }).catch(() => {}); load(); const t = setInterval(load, 15000); return () => clearInterval(t); }, [currency]);
 
   const lookup = async () => { if (!name.trim()) return; const r = await searchSymbols({ data: { q: name.trim(), kind } }); setResults(r); if (!r.length) toast('No matching ticker found'); };
 
@@ -87,6 +89,7 @@ export function InvestmentsPage() {
 
   return <div className="section-stack space-y-5">
     <div className="page-heading"><p className="text-xs uppercase font-semibold mb-1">YOUR FINANCES</p><h1 className="text-3xl font-semibold">Investments</h1><p className="text-sm mt-1">Live prices for listed holdings, manual values for the rest.</p></div>
+    <div className="grid grid-cols-2 gap-3">{([['Gold 22K / g', metals.gold], ['Silver / g', metals.silver]] as const).map(([l, v]) => <div key={l} className="panel p-4"><p className="text-xs text-muted-foreground flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />{l} · live</p><p className="text-lg font-semibold mt-1">{v ? money(v, currency) : '—'}</p></div>)}</div>
     <div className="hero-surface rounded-[28px] p-6">
       <div className="flex justify-between items-start"><p className="text-sm opacity-70">Portfolio value</p><Button variant="ghost" size="icon" className="pill text-hero-foreground hover:bg-hero-foreground/10" aria-label="Refresh prices" onClick={() => void refresh()} disabled={loading}><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /></Button></div>
       <p className="text-4xl font-semibold mt-1">{money(current, currency)}</p>
