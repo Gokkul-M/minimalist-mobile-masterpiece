@@ -74,10 +74,10 @@ export function InvestmentsPage() {
   const lookup = async () => { if (!name.trim()) return; const r = await searchSymbols({ data: { q: name.trim(), kind } }); setResults(r); if (!r.length) toast('No matching ticker found'); };
 
   const add = async () => {
-    const fixed = isFixed(kind); const q = fixed ? 1 : Number(qty), b = Number(buy);
-    if (!name.trim() || !(q > 0) || !(b >= 0)) { toast.error(fixed ? 'Enter name and amount invested' : 'Enter name, quantity and buy price'); return; }
+    const fixed = isFixed(kind); const q = fixed ? 1 : Number(qty), b = Number(buy); const nm = name.trim() || (METAL[kind] ? kind : '');
+    if (!nm || !(q > 0) || !(b >= 0)) { toast.error(fixed ? 'Enter name and amount invested' : 'Enter name, quantity and buy price'); return; }
     const sym = fixed ? undefined : (METAL[kind] ?? (symbol.trim().toUpperCase() || undefined));
-    const h: Holding = { id: crypto.randomUUID(), name: name.trim(), kind, qty: q, buyPrice: b, currentValue: Number(value) || q * b, date: todayKey(), symbol: sym, rate: fixed ? Number(rate) || 0 : undefined };
+    const h: Holding = { id: crypto.randomUUID(), name: nm, kind, qty: q, buyPrice: b, currentValue: Number(value) || q * b, date: todayKey(), symbol: sym, rate: fixed ? Number(rate) || 0 : undefined };
     s.set({ holdings: [...s.holdings, h] }); setName(''); setQty(''); setBuy(''); setValue(''); setSymbol(''); setRate(''); setResults([]);
     if (fixed) { void refresh(true); }
     toast.success('Holding added');
@@ -116,10 +116,10 @@ export function InvestmentsPage() {
 
     <div className="panel p-5 space-y-3">
       <h2 className="font-semibold">Add a holding</h2>
-      <div className="relative"><input className="field w-full" style={{ paddingLeft: 44 }} placeholder="Name (e.g. Apple, Bitcoin)" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); void lookup(); } }} /><button type="button" aria-label="Search ticker" onClick={() => void lookup()} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 grid place-items-center rounded-full text-muted-foreground hover:bg-secondary"><Search size={16} /></button></div>
+      <div className="relative"><input className="field w-full" style={{ paddingLeft: 44 }} placeholder={METAL[kind] ? `Name (optional, defaults to ${kind})` : "Name (e.g. Apple, Bitcoin)"} value={name} onChange={e => setName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); void lookup(); } }} /><button type="button" aria-label="Search ticker" onClick={() => void lookup()} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 grid place-items-center rounded-full text-muted-foreground hover:bg-secondary"><Search size={16} /></button></div>
       {!!results.length && <div className="rounded-2xl border divide-y overflow-hidden">{results.map(r => <button key={r.symbol} type="button" className="w-full text-left px-4 py-2 text-sm hover:bg-secondary" onClick={() => { setSymbol(r.symbol); setName(r.name); setResults([]); }}><b>{r.symbol}</b> · {r.name} <span className="text-muted-foreground">{r.exchange}</span></button>)}</div>}
       <div className="grid grid-cols-2 gap-2">
-        <select className="field min-w-0" value={kind} onChange={e => { setKind(e.target.value); setSymbol(METAL[e.target.value] ?? ''); setResults([]); }} aria-label="Type">{KINDS.map(k => <option key={k}>{k}</option>)}</select>
+        <select className="field min-w-0" value={kind} onChange={e => { const k = e.target.value; setKind(k); setSymbol(METAL[k] ?? ''); setResults([]); const ms = METAL[k]; if (ms) { setBuy(''); void getQuotes({ data: { symbols: [ms], currency } }).then(r => { const q = r.quotes[ms]; if (q) { setBuy(String(Math.round(q.price * 100) / 100)); toast.success(`Live ${k.toLowerCase()} price loaded`); } else toast.error('Could not fetch the live price'); }).catch(() => toast.error('Could not fetch the live price')); } }} aria-label="Type">{KINDS.map(k => <option key={k}>{k}</option>)}</select>
         {isFixed(kind) ? <input className="field min-w-0" inputMode="decimal" placeholder="Interest % / year" value={rate} onChange={e => setRate(e.target.value)} />
           : <input className="field min-w-0" placeholder="Ticker (optional)" value={symbol} readOnly={!!METAL[kind]} onChange={e => setSymbol(e.target.value)} />}
         {isFixed(kind) ? <input className="field min-w-0 col-span-2" inputMode="decimal" placeholder="Amount invested" value={buy} onChange={e => setBuy(e.target.value)} /> : <>
