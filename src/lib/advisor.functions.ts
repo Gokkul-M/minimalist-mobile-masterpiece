@@ -10,7 +10,7 @@ const Input = z.object({
 export const getAdvice = createServerFn({ method: 'POST' })
   .validator((d) => Input.parse(d))
   .handler(async ({ data }) => {
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env['LOVABLE_API_KEY'];
     if (!apiKey) return { ok: false as const, error: 'AI is not configured yet.' };
     const { createOpenAI } = await import('@ai-sdk/openai');
     const { streamText } = await import('ai');
