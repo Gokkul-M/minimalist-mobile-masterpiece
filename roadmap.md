@@ -14,3 +14,5 @@
 - [x] Replace the Expenses all-category list with a filterable, zoomable multi-line chart.
 - [x] Make expense analytics zoom through hourly, daily, weekly, monthly, and yearly views with refined line styling.
 - [x] Add a first-use guided tour, branded loading feedback, and consistent page transitions.
+- [x] Make recorded savings contributions editable and verify updated totals.
+- [x] Restyle expense category analytics as an accessible, unboxed spending-trend chart.
