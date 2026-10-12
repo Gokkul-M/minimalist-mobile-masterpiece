@@ -37,7 +37,7 @@ function entryDate(entry: Entry) {
 
 function floorDate(date: Date, level: Granularity) {
   const result = new Date(date);
-  result.setSeconds(0, 0);
+  result.setMinutes(0, 0, 0);
   if (level !== 'hour') result.setHours(0);
   if (level === 'week') {
     const day = result.getDay();
@@ -132,7 +132,7 @@ export function ExpenseCategoryChart({ entries, categories, currency = 'USD' }: 
     };
     element.addEventListener('wheel', handleWheel, { passive: false });
     return () => element.removeEventListener('wheel', handleWheel);
-  }, []);
+  }, [data.length, selected.length]);
 
   const toggle = (category: string, checked: boolean) => setSelected(current => checked ? [...current, category] : current.filter(item => item !== category));
   const currentLevel = LEVELS[levelIndex] ?? LEVELS[1];
@@ -147,20 +147,20 @@ export function ExpenseCategoryChart({ entries, categories, currency = 'USD' }: 
     return first.toDateString() === last.toDateString() ? formatter.format(first) : `${formatter.format(first)} – ${formatter.format(last)}`;
   })() : '';
 
-  return <section className="panel p-4 sm:p-5 mt-8 mb-8" aria-label="Expense categories chart">
+  return <section className="mt-10 mb-10 min-w-0" aria-label="Expense categories chart">
     <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
       <div>
         <h2 className="text-lg font-semibold">All categories</h2>
         <p className="text-xs text-muted-foreground mt-0.5">{periodLabel || 'Compare spending over time'}</p>
       </div>
-      <div className="flex items-center gap-1.5 max-w-full">
+      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="secondary" size="sm" className="pill min-w-0 px-3" aria-label="Choose expense categories">
-              <span className="max-w-24 truncate">{selected.length === categories.length ? 'All categories' : `${selected.length} selected`}</span><ChevronDown />
+            <Button variant="secondary" size="sm" className="pill h-11 min-w-0 px-3" aria-label="Choose expense categories">
+              <span>Categories · {selected.length}</span><ChevronDown />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64 max-h-80 rounded-xl p-2 bg-white text-foreground border border-black/5 shadow-lg">
+          <DropdownMenuContent align="end" className="w-64 max-w-[calc(100vw-2rem)] max-h-80 overflow-y-auto rounded-xl p-2 bg-card text-foreground border-border shadow-lg">
             <DropdownMenuLabel className="flex items-center justify-between gap-2">
               Categories
               <span className="flex gap-1">
@@ -174,27 +174,27 @@ export function ExpenseCategoryChart({ entries, categories, currency = 'USD' }: 
               checked={selected.includes(category)}
               onCheckedChange={checked => toggle(category, checked === true)}
               onSelect={event => event.preventDefault()}
-              className="rounded-lg py-2.5"
+              className="rounded-lg min-h-11 py-2.5"
             >
               <span className="mr-2 h-2.5 w-2.5 rounded-full" style={{ backgroundColor: LINE_COLORS[index % LINE_COLORS.length] }} />
               <span className="truncate">{category}</span>
             </DropdownMenuCheckboxItem>)}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button variant="secondary" size="icon" className="h-9 w-9 shrink-0" aria-label={`Zoom out${zoomOutLevel ? ` to ${zoomOutLevel.noun}` : ''}`} title={zoomOutLevel ? `Show ${zoomOutLevel.noun}` : 'Maximum zoom out'} disabled={!zoomOutLevel || !data.length} onClick={() => zoom('out')}><Minus /></Button>
-        <Button variant="secondary" size="icon" className="h-9 w-9 shrink-0" aria-label={`Zoom in${zoomInLevel ? ` to ${zoomInLevel.noun}` : ''}`} title={zoomInLevel ? `Show ${zoomInLevel.noun}` : 'Maximum zoom in'} disabled={!zoomInLevel || !data.length} onClick={() => zoom('in')}><Plus /></Button>
-        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" aria-label="Reset to days" title="Reset to daily view" disabled={levelIndex === 1} onClick={() => { levelRef.current = 1; setLevelIndex(1); }}><RotateCcw /></Button>
+        <Button variant="secondary" size="icon" className="h-11 w-11 shrink-0" aria-label={`Zoom out${zoomOutLevel ? ` to ${zoomOutLevel.noun}` : ''}`} title={zoomOutLevel ? `Show ${zoomOutLevel.noun}` : 'Maximum zoom out'} disabled={!zoomOutLevel || !data.length} onClick={() => zoom('out')}><Minus /></Button>
+        <Button variant="secondary" size="icon" className="h-11 w-11 shrink-0" aria-label={`Zoom in${zoomInLevel ? ` to ${zoomInLevel.noun}` : ''}`} title={zoomInLevel ? `Show ${zoomInLevel.noun}` : 'Maximum zoom in'} disabled={!zoomInLevel || !data.length} onClick={() => zoom('in')}><Plus /></Button>
+        <Button variant="ghost" size="icon" className="h-11 w-11 shrink-0" aria-label="Reset to days" title="Reset to daily view" disabled={levelIndex === 1} onClick={() => { levelRef.current = 1; setLevelIndex(1); }}><RotateCcw /></Button>
       </div>
     </div>
     <div className="flex items-center justify-between gap-3 mb-3">
-      <span className="pill bg-secondary px-3 py-1.5 text-xs font-medium">{currentLevel?.label} view</span>
-      <span className="text-[11px] text-muted-foreground text-right">− {zoomOutLevel ? zoomOutLevel.noun : 'years'} · + {zoomInLevel ? zoomInLevel.noun : 'hours'}</span>
+      <span className="text-xs font-medium text-muted-foreground">{currentLevel?.label} view</span>
+      <span className="text-xs text-muted-foreground">{selected.length} categories</span>
     </div>
     {data.length && selected.length ? <>
-      <div ref={chartRef} className="h-72 w-full min-w-0 touch-none rounded-2xl bg-secondary/40 pt-3" role="img" aria-label={`${currentLevel?.label} expense lines for ${selected.join(', ')}`}>
+      <div ref={chartRef} className="h-64 sm:h-72 w-full min-w-0 touch-pan-y" role="img" aria-label={`${currentLevel?.label} expense lines for ${selected.join(', ')}`}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 8, right: 12, left: -18, bottom: 4 }}>
-            <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="2 6" />
+            <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} interval="preserveStartEnd" />
             <YAxis tickLine={false} axisLine={false} width={54} domain={[0, 'auto']} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} tickFormatter={value => Intl.NumberFormat('en', { notation: 'compact' }).format(Number(value))} />
             <Tooltip cursor={{ stroke: 'var(--muted-foreground)', strokeWidth: 1, strokeDasharray: '3 4' }} formatter={(value, name) => [money(Number(value), currency), String(name)]} labelFormatter={label => `${currentLevel?.label} · ${String(label)}`} contentStyle={{ background: 'var(--card)', borderColor: 'var(--border)', borderRadius: 12, color: 'var(--foreground)', boxShadow: '0 12px 30px color-mix(in oklch, var(--foreground) 12%, transparent)' }} />
@@ -202,10 +202,9 @@ export function ExpenseCategoryChart({ entries, categories, currency = 'USD' }: 
           </LineChart>
         </ResponsiveContainer>
       </div>
-      <div className="flex items-center gap-3 overflow-x-auto scrollbar-hidden mt-3 pb-0.5" aria-label="Visible category legend">
-        {categories.filter(category => selected.includes(category)).map(category => <span key={category} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground whitespace-nowrap"><span className="h-1.5 w-5 rounded-full" style={{ backgroundColor: LINE_COLORS[categories.indexOf(category) % LINE_COLORS.length] }} />{category}</span>)}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-3" aria-label="Visible category legend">
+        {categories.filter(category => selected.includes(category)).map(category => <span key={category} className="inline-flex items-center gap-2 text-xs text-muted-foreground min-w-0 max-w-full"><span className="h-0.5 w-4 shrink-0" style={{ backgroundColor: LINE_COLORS[categories.indexOf(category) % LINE_COLORS.length] }} /><span className="break-words">{category}</span></span>)}
       </div>
-      <p className="text-[11px] text-muted-foreground mt-2">Scroll to move between hours, days, weeks, months and years · Tap a point for details</p>
     </> : <div className="h-56 grid place-items-center text-center px-6"><div><p className="font-medium">{data.length ? 'No categories selected' : 'No expenses in this period'}</p><p className="text-sm text-muted-foreground mt-1">{data.length ? 'Choose categories from the menu to compare them.' : 'Your category lines will appear after you add an expense.'}</p></div></div>}
   </section>;
 }
