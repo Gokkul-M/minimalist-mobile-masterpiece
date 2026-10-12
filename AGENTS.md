@@ -13,3 +13,4 @@
 - Persist completion of the first-use product tour with the ledger store so it appears only once per user dataset.
 - Keep category icon choices as icon keys in the store (categoryIcons) resolved via src/lib/category-icons.ts; keys stay serializable for cloud sync.
 - Read receipts and UPI screenshots with on-device OCR (tesseract.js, lazy-loaded); no server or AI call is needed.
+- Keep savings contribution editing in a focused component and update the linked entry and goal total in one store change; this keeps saved balances and transaction history consistent.
